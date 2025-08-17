@@ -1,10 +1,164 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import LoadingSpinner from "../components/LoadingSpinner";
-import StatusMessage from "../components/StatusMessage";
-import VisualButton from "../components/VisualButton";
+import React, { useState, useEffect } from "react";
+import Link from 'next/link';
+
+// --- Language Translations ---
+const translations = {
+  en: {
+    portalTitle: "UPM Government Portal",
+    portalSubtitle: "The United Pingdom of MINET",
+    signIn: "Sign In",
+    createAccount: "Create Account",
+    welcomeUser: "Welcome,",
+    signOut: "Sign Out",
+    heroTitle: "Welcome to UPM Digital Services",
+    heroSubtitle: "Your trusted gateway to government services. Access essentials with security and ease.",
+    servicesTitle: "Government Services",
+    servicesSubtitle: "Click on any service below to get started",
+    getStarted: "Get Started",
+    newsTitle: "Latest Updates",
+    newsSubtitle: "Stay informed about government services and announcements",
+    news1: "Citizen ID verification system now available online.",
+    news2: "Electricity bill payment portal upgraded for better security.",
+    news3: "System maintenance scheduled for Sunday 2AM-4AM.",
+    footerTitle: "UPM Government",
+    footerSlogan: "Building trust through digital innovation since 1999.",
+    quickLinks: "Quick Links",
+    aboutUpm: "About UPM",
+    contactOfficials: "Contact Officials",
+    helpSupport: "Help & Support",
+    services: "Services",
+    billsPayments: "Bills & Payments",
+    documents: "Documents",
+    schemes: "Schemes",
+    contactInfo: "Contact Info",
+    address: "Government Complex, Susland",
+    phone: "1-800-UPM-HELP",
+    email: "digital@upm.gov.minet",
+    rightsReserved: "© 1999-2025 United Pingdom of MINET - All Rights Reserved",
+    loginTitle: "Welcome Back",
+    loginSubtitle: "Sign in to your account",
+    usernameLabel: "Username",
+    passwordLabel: "Password",
+    cancel: "Cancel",
+    signupTitle: "Create Account",
+    signupSubtitle: "Join thousands of UPM citizens online",
+    loginSuccess: "Welcome back!",
+    loginError: "Invalid username or password.",
+    signupSuccess: "Account created! You can now sign in.",
+    signupError: "Username already exists.",
+    logoutMessage: "You have been logged out.",
+    changeToHindi: "हिंदी में",
+  },
+  hi: {
+    portalTitle: "यूपीएम सरकारी पोर्टल",
+    portalSubtitle: "द यूनाइटेड पिंगडम ऑफ मिनेट",
+    signIn: "साइन इन करें",
+    createAccount: "खाता बनाएं",
+    welcomeUser: "आपका स्वागत है,",
+    signOut: "साइन आउट करें",
+    heroTitle: "यूपीएम डिजिटल सेवाओं में आपका स्वागत है",
+    heroSubtitle: "सरकारी सेवाओं के लिए आपका विश्वसनीय प्रवेश द्वार। सुरक्षा और आसानी से आवश्यक सेवाओं तक पहुँचें।",
+    servicesTitle: "सरकारी सेवाएँ",
+    servicesSubtitle: "शुरू करने के लिए नीचे दी गई किसी भी सेवा पर क्लिक करें",
+    getStarted: "शुरू करें",
+    newsTitle: "नवीनतम अपडेट",
+    newsSubtitle: "सरकारी सेवाओं और घोषणाओं के बारे में सूचित रहें",
+    news1: "नागरिक आईडी सत्यापन प्रणाली अब ऑनलाइन उपलब्ध है।",
+    news2: "बेहतर सुरक्षा के लिए बिजली बिल भुगतान पोर्टल को अपग्रेड किया गया।",
+    news3: "सिस्टम रखरखाव रविवार को सुबह 2 बजे से 4 बजे तक निर्धारित है।",
+    footerTitle: "यूपीएम सरकार",
+    footerSlogan: "1999 से डिजिटल नवाचार के माध्यम से विश्वास का निर्माण।",
+    quickLinks: "त्वरित लिंक्स",
+    aboutUpm: "यूपीएम के बारे में",
+    contactOfficials: "अधिकारियों से संपर्क करें",
+    helpSupport: "सहायता और समर्थन",
+    services: "सेवाएं",
+    billsPayments: "बिल और भुगतान",
+    documents: "दस्तावेज़",
+    schemes: "योजनाएं",
+    contactInfo: "संपर्क जानकारी",
+    address: "सरकारी परिसर, ससलैंड",
+    phone: "1-800-यूपीएम-हेल्प",
+    email: "digital@upm.gov.minet",
+    rightsReserved: "© 1999-2025 द यूनाइटेड पिंगडम ऑफ मिनेट - सर्वाधिकार सुरक्षित",
+    loginTitle: "वापसी पर स्वागत है",
+    loginSubtitle: "अपने खाते में साइन इन करें",
+    usernameLabel: "उपयोगकर्ता नाम",
+    passwordLabel: "पासवर्ड",
+    cancel: "रद्द करें",
+    signupTitle: "खाता बनाएं",
+    signupSubtitle: "हजारों यूपीएम नागरिकों से ऑनलाइन जुड़ें",
+    loginSuccess: "वापसी पर स्वागत है!",
+    loginError: "अमान्य उपयोगकर्ता नाम या पासवर्ड।",
+    signupSuccess: "खाता बन गया! अब आप साइन इन कर सकते हैं।",
+    signupError: "उपयोगकर्ता नाम पहले से मौजूद है।",
+    logoutMessage: "आपको लॉग आउट कर दिया गया है।",
+    changeToEnglish: "English",
+  },
+};
+
+// --- Helper Components (Inlined to ensure functionality) ---
+
+const LoadingSpinner = ({ size = 'md', color = 'white' }) => {
+  const sizeClasses = { sm: 'w-4 h-4', md: 'w-8 h-8' };
+  const colorClasses = { white: 'border-white', black: 'border-black' };
+  return <div className={`animate-spin rounded-full ${sizeClasses[size]} border-t-2 border-b-2 ${colorClasses[color]}`}></div>;
+};
+
+const StatusMessage = ({ type, message, onClose }) => {
+  const typeClasses = {
+    success: "bg-green-100 text-green-800",
+    error: "bg-red-100 text-red-800",
+    info: "bg-blue-100 text-blue-800",
+  };
+  useEffect(() => {
+    const timer = setTimeout(onClose, 5000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  return (
+    <div className={`fixed top-5 right-5 p-4 rounded-lg shadow-lg flex items-center space-x-3 z-50 ${typeClasses[type]}`}>
+      <span>{message}</span>
+      <button onClick={onClose} className="font-bold text-lg">&times;</button>
+    </div>
+  );
+};
+
+// --- Main Service Card Component ---
+
+const ServiceCard = ({ icon, name, description, color, path, lang }) => {
+  const colorClasses = {
+    yellow: { bg: "from-yellow-50 via-amber-50", iconBg: "bg-yellow-100", iconText: "text-yellow-600" },
+    blue: { bg: "from-blue-50 via-sky-50", iconBg: "bg-blue-100", iconText: "text-blue-600" },
+    purple: { bg: "from-purple-50 via-fuchsia-50", iconBg: "bg-purple-100", iconText: "text-purple-600" },
+    green: { bg: "from-green-50 via-emerald-50", iconBg: "bg-green-100", iconText: "text-green-600" },
+    red: { bg: "from-red-50 via-rose-50", iconBg: "bg-red-100", iconText: "text-red-600" },
+    indigo: { bg: "from-indigo-50 via-violet-50", iconBg: "bg-indigo-100", iconText: "text-indigo-600" },
+  };
+  const selectedColor = colorClasses[color] || colorClasses.yellow;
+
+  return (
+    <a href={path} className={`block relative p-6 bg-gradient-to-br ${selectedColor.bg} to-stone-50 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden group border border-stone-200/50`}>
+      <div className="relative z-10">
+        <div className={`w-16 h-16 ${selectedColor.iconBg} rounded-xl flex items-center justify-center mb-4 shadow-sm`}>
+          <span className={`text-3xl ${selectedColor.iconText}`}>{icon}</span>
+        </div>
+        <h4 className="text-xl font-bold text-stone-800 mb-2">{name}</h4>
+        <p className="text-stone-600 mb-4 h-12">{description}</p>
+        <div className="flex items-center text-amber-600 font-semibold group-hover:text-amber-700">
+          <span>{lang.getStarted}</span>
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </div>
+      </div>
+    </a>
+  );
+};
+
+// --- Home Page Component ---
 
 export default function Home() {
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -14,144 +168,123 @@ export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState(null);
-  const [user, setUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [users, setUsers] = useState([]); // In-memory user store
+  const [language, setLanguage] = useState('en'); // 'en' or 'hi'
 
-  // Check if user is already logged in on component mount
+  const lang = translations[language];
+
+  // Check for saved user in localStorage on initial render
   useEffect(() => {
     const savedUser = localStorage.getItem('upm_user');
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      setCurrentUser(JSON.parse(savedUser));
       setIsLoggedIn(true);
     }
   }, []);
 
-  const handleLogin = async (e) => {
+  const handleLogin = (e) => {
     e.preventDefault();
     setIsLoading(true);
     setStatusMessage(null);
-    
-    try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userName: username, password }),
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setUser(data.user);
+
+    setTimeout(() => {
+      const foundUser = users.find(u => u.username === username && u.password === password);
+      if (foundUser) {
+        setCurrentUser(foundUser);
         setIsLoggedIn(true);
-        localStorage.setItem('upm_user', JSON.stringify(data.user));
+        localStorage.setItem('upm_user', JSON.stringify(foundUser));
         setShowLoginModal(false);
         setUsername("");
         setPassword("");
-        setStatusMessage({ type: 'success', message: 'Welcome back! Login successful.' });
+        setStatusMessage({ type: 'success', message: lang.loginSuccess });
       } else {
-        const errorData = await response.json();
-        setStatusMessage({ type: 'error', message: errorData.error || 'Login failed. Please check your credentials.' });
+        setStatusMessage({ type: 'error', message: lang.loginError });
       }
-    } catch (error) {
-      console.error("Login error:", error);
-      setStatusMessage({ type: 'error', message: 'Network error. Please try again.' });
-    } finally {
       setIsLoading(false);
-    }
+    }, 1000);
   };
 
-  const handleSignup = async (e) => {
+  const handleSignup = (e) => {
     e.preventDefault();
     setIsLoading(true);
     setStatusMessage(null);
-    
-    try {
-      const response = await fetch("/api/auth/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userName: username, password }),
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
+
+    setTimeout(() => {
+      if (users.some(u => u.username === username)) {
+        setStatusMessage({ type: 'error', message: lang.signupError });
+      } else {
+        const newUser = { username, password };
+        setUsers([...users, newUser]);
         setShowSignupModal(false);
         setUsername("");
         setPassword("");
-        setStatusMessage({ type: 'success', message: 'Account created successfully! You can now sign in.' });
-      } else {
-        const errorData = await response.json();
-        setStatusMessage({ type: 'error', message: errorData.error || 'Signup failed. Please try again.' });
+        setStatusMessage({ type: 'success', message: lang.signupSuccess });
       }
-    } catch (error) {
-      console.error("Signup error:", error);
-      setStatusMessage({ type: 'error', message: 'Network error. Please try again.' });
-    } finally {
       setIsLoading(false);
-    }
+    }, 1000);
   };
 
   const handleLogout = () => {
     setIsLoggedIn(false);
-    setUser(null);
+    setCurrentUser(null);
     localStorage.removeItem('upm_user');
-    setStatusMessage({ type: 'info', message: 'You have been logged out successfully.' });
+    setStatusMessage({ type: 'info', message: lang.logoutMessage });
+  };
+
+  const toggleLanguage = () => {
+    setLanguage(prevLang => prevLang === 'en' ? 'hi' : 'en');
+  };
+
+  const servicesData = {
+    en: [
+      { name: "Electricity Services", icon: "⚡", path: "/services/electricity", color: "yellow", description: "Pay bills, check consumption, and report outages." },
+      { name: "Water & Sanitation", icon: "💧", path: "/services/water", color: "blue", description: "Manage water billing and submit maintenance requests." },
+      { name: "Education Portal", icon: "📚", path: "/services/education", color: "purple", description: "Access student records and apply for scholarships." },
+      { name: "Citizen Benefits", icon: "📋", path: "/services/schemes", color: "green", description: "Explore social schemes and various welfare programs." },
+      { name: "Public Transport", icon: "🚌", path: "/services/transport", color: "red", description: "Find bus schedules and detailed route information." },
+      { name: "Railway Services", icon: "🚂", path: "/services/railway", color: "indigo", description: "Book tickets for trains and check train schedules." },
+    ],
+    hi: [
+      { name: "बिजली सेवाएं", icon: "⚡", path: "/services/electricity", color: "yellow", description: "बिल भुगतान करें, खपत जांचें, और आउटेज की रिपोर्ट करें।" },
+      { name: "जल और स्वच्छता", icon: "💧", path: "/services/water", color: "blue", description: "पानी के बिल का प्रबंधन करें और रखरखाव अनुरोध सबमिट करें।" },
+      { name: "शिक्षा पोर्टल", icon: "📚", path: "/services/education", color: "purple", description: "छात्र रिकॉर्ड तक पहुंचें और छात्रवृत्ति के लिए आवेदन करें।" },
+      { name: "नागरिक लाभ", icon: "📋", path: "/services/schemes", color: "green", description: "सामाजिक योजनाओं और विभिन्न कल्याणकारी कार्यक्रमों का अन्वेषण करें।" },
+      { name: "सार्वजनिक परिवहन", icon: "🚌", path: "/services/transport", color: "red", description: "बस शेड्यूल और विस्तृत मार्ग जानकारी प्राप्त करें।" },
+      { name: "रेलवे सेवाएं", icon: "🚂", path: "/services/railway", color: "indigo", description: "ट्रेनों के लिए टिकट बुक करें और ट्रेन शेड्यूल जांचें।" },
+    ]
   };
 
   return (
-    <div className="min-h-screen bg-stone-50 font-['Inter', 'Segoe UI', sans-serif]">
-      {/* Status Messages */}
-      {statusMessage && (
-        <StatusMessage
-          type={statusMessage.type}
-          message={statusMessage.message}
-          onClose={() => setStatusMessage(null)}
-        />
-      )}
+    <div className="min-h-screen bg-stone-50 font-['Inter', 'Segoe UI', sans-serif] text-stone-800">
+      {statusMessage && <StatusMessage type={statusMessage.type} message={statusMessage.message} onClose={() => setStatusMessage(null)} />}
 
-      {/* Modern Header */}
       <header className="bg-white shadow-sm border-b border-stone-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-lg flex items-center justify-center shadow-lg">
-                <span className="text-white text-lg sm:text-xl font-bold">🏛️</span>
+              <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-lg flex items-center justify-center shadow-lg">
+                <span className="text-white text-xl font-bold">🏛️</span>
               </div>
               <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-stone-800">UPM Government Portal</h1>
-                <p className="text-stone-600 text-xs sm:text-sm">The United Pingdom of MINET</p>
+                <h1 className="text-2xl font-bold text-stone-800">{lang.portalTitle}</h1>
+                <p className="text-stone-600 text-sm">{lang.portalSubtitle}</p>
               </div>
             </div>
             
             <div className="flex items-center space-x-4">
+              <button onClick={toggleLanguage} className="px-4 py-2 text-sm font-semibold text-amber-600 hover:text-amber-800">
+                {language === 'en' ? lang.changeToHindi : lang.changeToEnglish}
+              </button>
               {isLoggedIn ? (
                 <div className="flex items-center space-x-4">
-                  <div className="text-sm">
-                    <span className="text-stone-600">Welcome,</span>
-                    <span className="font-semibold text-stone-800 ml-1">{user?.userName}</span>
-                  </div>
-                  <button 
-                    onClick={handleLogout}
-                    className="px-4 sm:px-6 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-all duration-300 shadow-sm text-sm sm:text-base btn-primary"
-                  >
-                    🚪 Sign Out
-                  </button>
+                  <div className="text-sm"><span className="text-stone-600">{lang.welcomeUser}</span> <span className="font-semibold">{currentUser?.username}</span></div>
+                  <button onClick={handleLogout} className="px-6 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 shadow-sm">🚪 {lang.signOut}</button>
                 </div>
               ) : (
                 <>
-                  <button 
-                    onClick={() => setShowLoginModal(true)}
-                    className="px-4 sm:px-6 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-medium rounded-lg hover:from-amber-600 hover:to-amber-700 transition-all duration-300 shadow-sm text-sm sm:text-base btn-primary"
-                  >
-                    🔐 Sign In
-                  </button>
-                  <button 
-                    onClick={() => setShowSignupModal(true)}
-                    className="px-4 sm:px-6 py-2 border-2 border-amber-600 text-amber-600 font-medium rounded-lg hover:bg-amber-50 transition-all duration-300 text-sm sm:text-base btn-secondary"
-                  >
-                    ✨ Create Account
-                  </button>
+                  <button onClick={() => setShowLoginModal(true)} className="px-6 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-medium rounded-lg hover:from-amber-600 hover:to-amber-700 shadow-sm">🔐 {lang.signIn}</button>
+                  <button onClick={() => setShowSignupModal(true)} className="px-6 py-2 border-2 border-amber-600 text-amber-600 font-medium rounded-lg hover:bg-amber-50">✨ {lang.createAccount}</button>
                 </>
               )}
             </div>
@@ -160,47 +293,10 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-amber-50 via-orange-50 to-stone-100 py-16 relative overflow-hidden">
-        {/* Background decoration */}
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute top-10 left-10 text-6xl">🏛️</div>
-          <div className="absolute top-20 right-20 text-4xl">⚡</div>
-          <div className="absolute bottom-20 left-20 text-5xl">💧</div>
-          <div className="absolute bottom-10 right-10 text-4xl">🚌</div>
-        </div>
-        
+      <section className="bg-gradient-to-br from-amber-50 via-orange-50 to-stone-100 py-16">
         <div className="max-w-7xl mx-auto px-6 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-stone-800 mb-6">
-            Welcome to UPM Digital Services
-          </h2>
-          <p className="text-xl text-stone-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-            Your trusted gateway to government services in The United Pingdom of MINET. 
-            Access essential services with security and ease.
-          </p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            <div className="bg-white p-6 rounded-xl shadow-lg border border-stone-200 hover:shadow-xl transition-all duration-300 service-card">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">👥</span>
-              </div>
-              <h3 className="font-semibold text-stone-800 mb-2">Population</h3>
-              <p className="text-blue-600 font-bold text-lg">6.9 Million</p>
-            </div>
-            <div className="bg-white p-6 rounded-xl shadow-lg border border-stone-200 hover:shadow-xl transition-all duration-300 service-card">
-              <div className="w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">🏛️</span>
-              </div>
-              <h3 className="font-semibold text-stone-800 mb-2">Capital</h3>
-              <p className="text-green-600 font-bold text-lg">Susland</p>
-            </div>
-            <div className="bg-white p-6 rounded-xl shadow-lg border border-stone-200 hover:shadow-xl transition-all duration-300 service-card">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">🌐</span>
-              </div>
-              <h3 className="font-semibold text-stone-800 mb-2">Internet</h3>
-              <p className="text-purple-600 font-bold text-lg">Trusted & Secure</p>
-            </div>
-          </div>
+          <h2 className="text-5xl font-bold text-stone-800 mb-6">{lang.heroTitle}</h2>
+          <p className="text-xl text-stone-600 mb-8 max-w-3xl mx-auto">{lang.heroSubtitle}</p>
         </div>
       </section>
 
@@ -208,132 +304,43 @@ export default function Home() {
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold text-stone-800 mb-4">Government Services</h3>
-            <p className="text-stone-600 text-lg mb-2">Access essential services from the comfort of your home</p>
-            <p className="text-stone-500 text-sm">👆 Click on any service below to get started</p>
+            <h3 className="text-3xl font-bold text-stone-800 mb-4">{lang.servicesTitle}</h3>
+            <p className="text-stone-600 text-lg">{lang.servicesSubtitle}</p>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              { 
-                name: "Electricity Services", 
-                icon: "⚡", 
-                path: "/services/electricity", 
-                color: "yellow",
-                iconColor: "text-yellow-600",
-                description: "Pay bills, check consumption, report outages"
-              },
-              { 
-                name: "Water & Sanitation", 
-                icon: "💧", 
-                path: "/services/water", 
-                color: "blue",
-                iconColor: "text-blue-600",
-                description: "Water billing, maintenance requests"
-              },
-              { 
-                name: "Education Portal", 
-                icon: "📚", 
-                path: "/services/education", 
-                color: "purple",
-                iconColor: "text-purple-600",
-                description: "Student records, scholarship applications"
-              },
-              { 
-                name: "Citizen Benefits", 
-                icon: "📋", 
-                path: "/services/schemes", 
-                color: "green",
-                iconColor: "text-green-600",
-                description: "Social schemes, welfare programs"
-              },
-              { 
-                name: "Public Transport", 
-                icon: "🚌", 
-                path: "/services/transport", 
-                color: "red",
-                iconColor: "text-red-600",
-                description: "Bus schedules, route information"
-              },
-              { 
-                name: "Railway Services", 
-                icon: "🚂", 
-                path: "/services/railway", 
-                color: "indigo",
-                iconColor: "text-indigo-600",
-                description: "Ticket booking, train schedules"
-              },
-            ].map((service, index) => (
-              <Link href={service.path} key={index}>
-                <VisualButton
-                  icon={service.icon}
-                  text={service.name}
-                  description={service.description}
-                  color={service.color}
-                  size="lg"
-                />
-              </Link>
-            ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {servicesData[language].map((service, index) => <ServiceCard key={index} {...service} lang={lang} />)}
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* News & Updates Section */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold text-stone-800 mb-4">Why Choose UPM Digital Services?</h3>
-            <p className="text-stone-600 text-lg">Experience the future of government services</p>
+            <h3 className="text-3xl font-bold text-stone-800 mb-4">{lang.newsTitle}</h3>
+            <p className="text-stone-600 text-lg">{lang.newsSubtitle}</p>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              { icon: "🔒", title: "Bank-Level Security", description: "Your data is protected with advanced encryption" },
-              { icon: "📱", title: "Low-Bandwidth Optimized", description: "Works on dial-up connections" },
-              { icon: "🏛️", title: "Government Backed", description: "Official UPM government website" },
-              { icon: "📞", title: "24/7 Support", description: "Call center for assistance" }
-            ].map((feature, index) => (
-              <div key={index} className="text-center group">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-amber-100 to-amber-200 rounded-full mb-4 group-hover:scale-110 transition-transform duration-300">
-                  <span className="text-2xl">{feature.icon}</span>
-                </div>
-                <h4 className="text-lg font-bold text-stone-800 mb-2">{feature.title}</h4>
-                <p className="text-stone-600">{feature.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* News & Updates */}
-      <section className="py-16 bg-stone-50">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold text-stone-800 mb-4">Latest Updates</h3>
-            <p className="text-stone-600 text-lg">Stay informed about government services and announcements</p>
-          </div>
-          
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white p-6 rounded-xl shadow-lg border border-stone-200 hover:shadow-xl transition-all duration-300 service-card">
+            <div className="bg-stone-50 p-6 rounded-xl border border-stone-200 hover:shadow-lg transition-shadow">
               <div className="flex items-center space-x-3 mb-4">
-                <span className="bg-green-100 text-green-800 font-bold text-sm px-3 py-1 rounded-full">🆕 NEW</span>
-                <span className="text-stone-400 text-sm">2 hours ago</span>
+                <span className="bg-green-100 text-green-800 font-bold text-sm px-3 py-1 rounded-full">NEW</span>
+                <span className="text-stone-400 text-sm">August 17, 2025</span>
               </div>
-              <p className="text-stone-700">Citizen ID verification system now available online</p>
+              <p className="text-stone-700">{lang.news1}</p>
             </div>
-            <div className="bg-white p-6 rounded-xl shadow-lg border border-stone-200 hover:shadow-xl transition-all duration-300 service-card">
+            <div className="bg-stone-50 p-6 rounded-xl border border-stone-200 hover:shadow-lg transition-shadow">
               <div className="flex items-center space-x-3 mb-4">
-                <span className="bg-blue-100 text-blue-800 font-bold text-sm px-3 py-1 rounded-full">🔄 UPDATE</span>
-                <span className="text-stone-400 text-sm">1 day ago</span>
+                <span className="bg-blue-100 text-blue-800 font-bold text-sm px-3 py-1 rounded-full">UPDATE</span>
+                <span className="text-stone-400 text-sm">August 16, 2025</span>
               </div>
-              <p className="text-stone-700">Electricity bill payment portal upgraded for better security</p>
+              <p className="text-stone-700">{lang.news2}</p>
             </div>
-            <div className="bg-white p-6 rounded-xl shadow-lg border border-stone-200 hover:shadow-xl transition-all duration-300 service-card">
+            <div className="bg-stone-50 p-6 rounded-xl border border-stone-200 hover:shadow-lg transition-shadow">
               <div className="flex items-center space-x-3 mb-4">
-                <span className="bg-amber-100 text-amber-800 font-bold text-sm px-3 py-1 rounded-full">📢 NOTICE</span>
-                <span className="text-stone-400 text-sm">3 days ago</span>
+                <span className="bg-amber-100 text-amber-800 font-bold text-sm px-3 py-1 rounded-full">NOTICE</span>
+                <span className="text-stone-400 text-sm">August 15, 2025</span>
               </div>
-              <p className="text-stone-700">System maintenance scheduled for Sunday 2AM-4AM</p>
+              <p className="text-stone-700">{lang.news3}</p>
             </div>
           </div>
         </div>
@@ -344,113 +351,58 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
-              <h4 className="text-xl font-bold mb-4 text-amber-400">UPM Government</h4>
-              <p className="text-stone-300 text-sm">
-                The United Pingdom of MINET<br />
-                Building trust through digital innovation since 1999
-              </p>
+              <h4 className="text-xl font-bold mb-4 text-amber-400">{lang.footerTitle}</h4>
+              <p className="text-stone-300 text-sm">{lang.footerSlogan}</p>
             </div>
             <div>
-              <h4 className="text-xl font-bold mb-4 text-amber-400">Quick Links</h4>
+              <h4 className="text-xl font-bold mb-4 text-amber-400">{lang.quickLinks}</h4>
               <ul className="space-y-2 text-stone-300 text-sm">
-                <li><a href="#" className="hover:text-amber-400 transition-colors">About UPM</a></li>
-                <li><a href="#" className="hover:text-amber-400 transition-colors">Contact Officials</a></li>
-                <li><a href="#" className="hover:text-amber-400 transition-colors">Help & Support</a></li>
+                <li><a href="#" className="hover:text-amber-400">{lang.aboutUpm}</a></li>
+                <li><a href="#" className="hover:text-amber-400">{lang.contactOfficials}</a></li>
+                <li><a href="#" className="hover:text-amber-400">{lang.helpSupport}</a></li>
               </ul>
             </div>
             <div>
-              <h4 className="text-xl font-bold mb-4 text-amber-400">Services</h4>
+              <h4 className="text-xl font-bold mb-4 text-amber-400">{lang.services}</h4>
               <ul className="space-y-2 text-stone-300 text-sm">
-                <li><a href="#" className="hover:text-amber-400 transition-colors">Bills & Payments</a></li>
-                <li><a href="#" className="hover:text-amber-400 transition-colors">Documents</a></li>
-                <li><a href="#" className="hover:text-amber-400 transition-colors">Schemes</a></li>
+                <li><a href="#" className="hover:text-amber-400">{lang.billsPayments}</a></li>
+                <li><a href="#" className="hover:text-amber-400">{lang.documents}</a></li>
+                <li><a href="#" className="hover:text-amber-400">{lang.schemes}</a></li>
               </ul>
             </div>
             <div>
-              <h4 className="text-xl font-bold mb-4 text-amber-400">Contact Info</h4>
+              <h4 className="text-xl font-bold mb-4 text-amber-400">{lang.contactInfo}</h4>
               <div className="text-stone-300 text-sm space-y-2">
-                <p>🏛️ Government Complex, Susland</p>
-                <p>📞 1-800-UPM-HELP</p>
-                <p>📧 digital@upm.gov.minet</p>
+                <p>🏛️ {lang.address}</p>
+                <p>📞 {lang.phone}</p>
+                <p>📧 {lang.email}</p>
               </div>
             </div>
           </div>
-          
           <div className="border-t border-stone-700 pt-8 text-center">
-            <p className="text-stone-400 text-sm">
-              © 1999-2025 United Pingdom of MINET - All Rights Reserved
-            </p>
-            <p className="text-xs text-stone-500 mt-2">
-              Optimized for all modern browsers and devices
-            </p>
+            <p className="text-stone-400 text-sm">{lang.rightsReserved}</p>
           </div>
         </div>
       </footer>
 
       {/* Login Modal */}
       {showLoginModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 fade-in">
-          <div className="bg-white rounded-xl p-8 w-full max-w-md shadow-2xl slide-in">
-            <div className="text-center mb-6">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full mb-4 shadow-lg">
-                <span className="text-2xl text-white">🔐</span>
-              </div>
-              <h2 className="text-2xl font-bold text-stone-800">Welcome Back</h2>
-              <p className="text-stone-600 mt-2">Sign in to your account</p>
-            </div>
-            
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl p-8 w-full max-w-md shadow-2xl">
+            <h2 className="text-2xl font-bold text-stone-800 text-center mb-6">{lang.loginTitle}</h2>
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <label className="block text-stone-700 font-semibold mb-2">Citizen ID / Username</label>
-                <input 
-                  type="text" 
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="w-full bg-white border-2 border-stone-300 p-4 rounded-lg focus:outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-200 transition-all duration-300 text-black placeholder-stone-500 input-field"
-                  placeholder="Enter your username"
-                  disabled={isLoading}
-                  required
-                />
+                <label className="block text-stone-700 font-semibold mb-2">{lang.usernameLabel}</label>
+                <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} className="w-full bg-white border-2 border-stone-300 p-4 rounded-lg text-black" required />
               </div>
               <div>
-                <label className="block text-stone-700 font-semibold mb-2">Password</label>
-                <input 
-                  type="password" 
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-white border-2 border-stone-300 p-4 rounded-lg focus:outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-200 transition-all duration-300 text-black placeholder-stone-500 input-field"
-                  placeholder="Enter your password"
-                  disabled={isLoading}
-                  required
-                />
+                <label className="block text-stone-700 font-semibold mb-2">{lang.passwordLabel}</label>
+                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-white border-2 border-stone-300 p-4 rounded-lg text-black" required />
               </div>
-              <button 
-                type="submit"
-                disabled={isLoading}
-                className="w-full bg-gradient-to-r from-amber-500 to-amber-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-amber-600 hover:to-amber-700 transition-all duration-300 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed btn-primary flex items-center justify-center space-x-2"
-              >
-                {isLoading ? (
-                  <>
-                    <LoadingSpinner size="sm" color="white" />
-                    <span>Signing In...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>🔐</span>
-                    <span>Sign In</span>
-                  </>
-                )}
+              <button type="submit" disabled={isLoading} className="w-full bg-amber-600 text-white font-semibold py-3 rounded-lg hover:bg-amber-700 flex items-center justify-center">
+                {isLoading ? <LoadingSpinner size="sm" /> : lang.signIn}
               </button>
-              <div className="text-center">
-                <button 
-                  type="button"
-                  onClick={() => setShowLoginModal(false)}
-                  disabled={isLoading}
-                  className="text-stone-500 hover:text-stone-700 font-medium transition-colors duration-200 disabled:opacity-50"
-                >
-                  Cancel
-                </button>
-              </div>
+              <button type="button" onClick={() => setShowLoginModal(false)} className="w-full text-stone-600 font-medium">{lang.cancel}</button>
             </form>
           </div>
         </div>
@@ -458,68 +410,22 @@ export default function Home() {
 
       {/* Signup Modal */}
       {showSignupModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 fade-in">
-          <div className="bg-white rounded-xl p-8 w-full max-w-md shadow-2xl slide-in">
-            <div className="text-center mb-6">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full mb-4 shadow-lg">
-                <span className="text-2xl text-white">✨</span>
-              </div>
-              <h2 className="text-2xl font-bold text-stone-800">Create Account</h2>
-              <p className="text-stone-600 mt-2">Join thousands of UPM citizens online</p>
-            </div>
-            
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl p-8 w-full max-w-md shadow-2xl">
+            <h2 className="text-2xl font-bold text-stone-800 text-center mb-6">{lang.signupTitle}</h2>
             <form onSubmit={handleSignup} className="space-y-4">
               <div>
-                <label className="block text-stone-700 font-semibold mb-2">Citizen ID / Username</label>
-                <input 
-                  type="text" 
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="w-full bg-white border-2 border-stone-300 p-4 rounded-lg focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-200 transition-all duration-300 text-black placeholder-stone-500 input-field"
-                  placeholder="Enter your username"
-                  disabled={isLoading}
-                  required
-                />
+                <label className="block text-stone-700 font-semibold mb-2">{lang.usernameLabel}</label>
+                <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} className="w-full bg-white border-2 border-stone-300 p-4 rounded-lg text-black" required />
               </div>
               <div>
-                <label className="block text-stone-700 font-semibold mb-2">Password</label>
-                <input 
-                  type="password" 
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-white border-2 border-stone-300 p-4 rounded-lg focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-200 transition-all duration-300 text-black placeholder-stone-500 input-field"
-                  placeholder="Enter your password"
-                  disabled={isLoading}
-                  required
-                />
+                <label className="block text-stone-700 font-semibold mb-2">{lang.passwordLabel}</label>
+                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-white border-2 border-stone-300 p-4 rounded-lg text-black" required />
               </div>
-              <button 
-                type="submit"
-                disabled={isLoading}
-                className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed btn-primary flex items-center justify-center space-x-2"
-              >
-                {isLoading ? (
-                  <>
-                    <LoadingSpinner size="sm" color="white" />
-                    <span>Creating Account...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>✨</span>
-                    <span>Create Account</span>
-                  </>
-                )}
+              <button type="submit" disabled={isLoading} className="w-full bg-green-600 text-white font-semibold py-3 rounded-lg hover:bg-green-700 flex items-center justify-center">
+                {isLoading ? <LoadingSpinner size="sm" /> : lang.createAccount}
               </button>
-              <div className="text-center">
-                <button 
-                  type="button"
-                  onClick={() => setShowSignupModal(false)}
-                  disabled={isLoading}
-                  className="text-stone-500 hover:text-stone-700 font-medium transition-colors duration-200 disabled:opacity-50"
-                >
-                  Cancel
-                </button>
-              </div>
+              <button type="button" onClick={() => setShowSignupModal(false)} className="w-full text-stone-600 font-medium">{lang.cancel}</button>
             </form>
           </div>
         </div>

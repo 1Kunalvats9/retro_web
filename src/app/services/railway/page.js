@@ -1,46 +1,263 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
+import React, { useState } from "react";
+import Link from 'next/link';
+// --- Language Translations ---
+const translations = {
+  en: {
+    portalTitle: "UPM Railway Services",
+    portalSubtitle: "The United Pingdom of MINET",
+    backToHome: "Back to Home",
+    findTrain: "Find Train",
+    pnrStatus: "PNR Status",
+    liveStatus: "Live Status",
+    fromStation: "From Station",
+    toStation: "To Station",
+    travelDate: "Travel Date",
+    searching: "Searching...",
+    searchTrains: "Search Trains",
+    availableTrains: "Available Trains",
+    searchAgain: "Search Again",
+    bookNow: "Book Now",
+    checkPnrStatus: "Check PNR Status",
+    pnrStatusHint: "Enter your 10-digit PNR number to check your booking status.",
+    pnrPlaceholder: "Enter PNR Number",
+    checkStatus: "Check Status",
+    liveTrainStatus: "Live Train Status",
+    liveStatusHint: "Enter the train number to track its real-time location.",
+    trainNumberPlaceholder: "Enter Train Number",
+    trackTrain: "Track Train",
+    confirmBooking: "Confirm Your Booking",
+    trainLabel: "Train:",
+    routeLabel: "Route:",
+    fareLabel: "Fare:",
+    cancel: "Cancel",
+    confirmAndPay: "Confirm & Pay",
+    bookingConfirmed: "Booking Confirmed!",
+    rightsReserved: "© 1999-2025 United Pingdom of MINET - All Rights Reserved",
+    changeToHindi: "हिंदी में",
+  },
+  hi: {
+    portalTitle: "यूपीएम रेलवे सेवाएं",
+    portalSubtitle: "द यूनाइटेड पिंगडम ऑफ मिनेट",
+    backToHome: "होम पर वापस जाएं",
+    findTrain: "ट्रेन खोजें",
+    pnrStatus: "पीएनआर स्थिति",
+    liveStatus: "लाइव स्थिति",
+    fromStation: "से स्टेशन",
+    toStation: "तक स्टेशन",
+    travelDate: "यात्रा की तारीख",
+    searching: "खोज हो रही है...",
+    searchTrains: "ट्रेन खोजें",
+    availableTrains: "उपलब्ध ट्रेनें",
+    searchAgain: "फिर से खोजें",
+    bookNow: "अभी बुक करें",
+    checkPnrStatus: "पीएनआर स्थिति जांचें",
+    pnrStatusHint: "अपनी बुकिंग स्थिति जांचने के लिए अपना 10 अंकों का पीएनआर नंबर दर्ज करें।",
+    pnrPlaceholder: "पीएनआर नंबर दर्ज करें",
+    checkStatus: "स्थिति जांचें",
+    liveTrainStatus: "लाइव ट्रेन स्थिति",
+    liveStatusHint: "वास्तविक समय में ट्रेन का स्थान ट्रैक करने के लिए ट्रेन नंबर दर्ज करें।",
+    trainNumberPlaceholder: "ट्रेन नंबर दर्ज करें",
+    trackTrain: "ट्रेन ट्रैक करें",
+    confirmBooking: "अपनी बुकिंग की पुष्टि करें",
+    trainLabel: "ट्रेन:",
+    routeLabel: "मार्ग:",
+    fareLabel: "किराया:",
+    cancel: "रद्द करें",
+    confirmAndPay: "पुष्टि करें और भुगतान करें",
+    bookingConfirmed: "बुकिंग की पुष्टि हो गई!",
+    rightsReserved: "© 1999-2025 द यूनाइटेड पिंगडम ऑफ मिनेट - सर्वाधिकार सुरक्षित",
+    changeToEnglish: "English",
+  },
+};
+
+
+// --- Helper Components ---
+
+const TrainCard = ({ train, onBookNow, lang }) => (
+  <div className="bg-white border border-stone-200 p-4 rounded-lg hover:shadow-lg transition-shadow duration-300">
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div className="flex-1">
+        <div className="flex items-center space-x-3 mb-2">
+          <span className="text-indigo-600 font-bold">🚂 {train.name}</span>
+          <span className={`text-sm font-semibold px-2 py-0.5 rounded-full ${train.typeColor}`}>
+            {train.type}
+          </span>
+        </div>
+        <div className="text-sm text-stone-600">
+          <div className="flex items-center space-x-2 mb-1">
+            <span>📍 {train.from}</span>
+            <span className="text-indigo-500 font-bold">→</span>
+            <span>📍 {train.to}</span>
+          </div>
+          <div className="flex items-center space-x-4 text-xs text-stone-500">
+            <span>⏰ {train.duration}</span>
+            <span>💰 ₹{train.fare}</span>
+            <span>🕐 Departs: {train.departs}</span>
+          </div>
+        </div>
+      </div>
+      <button 
+        onClick={() => onBookNow(train)}
+        className="bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors duration-200 text-sm w-full sm:w-auto"
+      >
+        {lang.bookNow}
+      </button>
+    </div>
+  </div>
+);
+
+const BookingModal = ({ train, onClose, lang }) => (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-xl p-8 w-full max-w-lg shadow-2xl text-left">
+            <h2 className="text-2xl font-bold text-stone-800 mb-4">{lang.confirmBooking}</h2>
+            <div className="bg-stone-50 border border-stone-200 p-4 rounded-lg mb-6 space-y-2">
+                <p><span className="font-semibold">{lang.trainLabel}</span> {train.name}</p>
+                <p><span className="font-semibold">{lang.routeLabel}</span> {train.from} to {train.to}</p>
+                <p><span className="font-semibold">{lang.fareLabel}</span> ₹{train.fare}</p>
+            </div>
+            <div className="flex gap-4">
+                <button
+                    onClick={onClose}
+                    className="flex-1 bg-stone-200 text-stone-800 font-semibold py-3 px-4 rounded-lg hover:bg-stone-300 transition-colors"
+                >
+                    {lang.cancel}
+                </button>
+                <button
+                    onClick={() => { alert(lang.bookingConfirmed); onClose(); }}
+                    className="flex-1 bg-green-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-green-700 transition-colors"
+                >
+                    {lang.confirmAndPay}
+                </button>
+            </div>
+        </div>
+    </div>
+);
+
 
 export default function RailwayServicesPage() {
-  const [fromStation, setFromStation] = useState("");
-  const [toStation, setToStation] = useState("");
-  const [date, setDate] = useState("");
+  const [fromStation, setFromStation] = useState("Susland");
+  const [toStation, setToStation] = useState("Coastal City");
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [showTrains, setShowTrains] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('find_train');
+  const [bookingDetails, setBookingDetails] = useState(null);
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [language, setLanguage] = useState('en');
+
+  const lang = translations[language];
+
+  const availableTrains = [
+    { name: "UPM Express", type: "Express", typeColor: "bg-green-100 text-green-700", from: fromStation, to: toStation, duration: "4h 30m", fare: 120, departs: "6:00 AM" },
+    { name: "Coastal Link", type: "Passenger", typeColor: "bg-blue-100 text-blue-700", from: fromStation, to: toStation, duration: "6h 15m", fare: 85, departs: "2:30 PM" },
+    { name: "Susland Special", type: "Premium", typeColor: "bg-purple-100 text-purple-700", from: fromStation, to: toStation, duration: "3h 45m", fare: 180, departs: "8:00 PM" },
+  ];
 
   const handleSearchTrains = (e) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    // Simulate API call with timeout
     setTimeout(() => {
       setShowTrains(true);
       setIsLoading(false);
     }, 1500);
   };
 
+  const handleBookNow = (train) => {
+    setBookingDetails(train);
+    setShowBookingModal(true);
+  };
+  
+  const toggleLanguage = () => {
+    setLanguage(prev => prev === 'en' ? 'hi' : 'en');
+  };
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'find_train':
+        return (
+          !showTrains ? (
+            <form onSubmit={handleSearchTrains} className="bg-stone-50 border border-stone-200 p-6 rounded-lg shadow-sm">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+                <div>
+                  <label className="block text-stone-700 font-semibold mb-2">{lang.fromStation}</label>
+                  <input type="text" value={fromStation} onChange={(e) => setFromStation(e.target.value)} className="w-full bg-white border-2 border-stone-300 p-4 rounded-lg text-black placeholder-stone-500" required />
+                </div>
+                <div>
+                  <label className="block text-stone-700 font-semibold mb-2">{lang.toStation}</label>
+                  <input type="text" value={toStation} onChange={(e) => setToStation(e.target.value)} className="w-full bg-white border-2 border-stone-300 p-4 rounded-lg text-black placeholder-stone-500" required />
+                </div>
+              </div>
+              <div className="mb-5">
+                <label className="block text-stone-700 font-semibold mb-2">{lang.travelDate}</label>
+                <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full bg-white border-2 border-stone-300 p-4 rounded-lg text-black" required />
+              </div>
+              <button type="submit" disabled={isLoading} className="w-full bg-indigo-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-indigo-700 shadow-md disabled:opacity-50 flex items-center justify-center space-x-2">
+                {isLoading ? <span className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span> : <span>🔍</span>}
+                <span>{isLoading ? lang.searching : lang.searchTrains}</span>
+              </button>
+            </form>
+          ) : (
+            <div className="bg-stone-50 border border-stone-200 p-6 rounded-lg shadow-sm animate-fade-in">
+              <h3 className="text-xl font-bold text-stone-800 mb-5 text-center">{lang.availableTrains}</h3>
+              <div className="space-y-4 mb-6">
+                {availableTrains.map((train, index) => (
+                  <TrainCard key={index} train={train} onBookNow={handleBookNow} lang={lang} />
+                ))}
+              </div>
+              <button onClick={() => setShowTrains(false)} className="w-full bg-stone-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-stone-700">
+                🔍 {lang.searchAgain}
+              </button>
+            </div>
+          )
+        );
+      case 'pnr_status':
+        return (
+          <div className="bg-stone-50 border border-stone-200 p-6 rounded-lg shadow-sm">
+            <h3 className="text-xl font-bold text-stone-800 mb-4">{lang.checkPnrStatus}</h3>
+            <p className="text-stone-600 mb-4 text-sm">{lang.pnrStatusHint}</p>
+            <input type="text" className="w-full bg-white border-2 border-stone-300 p-4 rounded-lg text-black placeholder-stone-500 mb-4" placeholder={lang.pnrPlaceholder} />
+            <button className="w-full bg-indigo-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-indigo-700">{lang.checkStatus}</button>
+          </div>
+        );
+      case 'live_status':
+        return (
+          <div className="bg-stone-50 border border-stone-200 p-6 rounded-lg shadow-sm">
+            <h3 className="text-xl font-bold text-stone-800 mb-4">{lang.liveTrainStatus}</h3>
+            <p className="text-stone-600 mb-4 text-sm">{lang.liveStatusHint}</p>
+            <input type="text" className="w-full bg-white border-2 border-stone-300 p-4 rounded-lg text-black placeholder-stone-500 mb-4" placeholder={lang.trainNumberPlaceholder} />
+            <button className="w-full bg-indigo-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-indigo-700">{lang.trackTrain}</button>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-stone-50 font-['Inter', 'Segoe UI', sans-serif]">
-      {/* Modern Header */}
-      <header className="bg-white shadow-sm border-b border-stone-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="min-h-screen bg-stone-50 font-['Inter', 'Segoe UI', sans-serif] text-stone-800">
+      {showBookingModal && <BookingModal train={bookingDetails} onClose={() => setShowBookingModal(false)} lang={lang} />}
+
+      <header className="bg-white shadow-sm border-b border-stone-200 sticky top-0 z-30">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-indigo-600 rounded-lg flex items-center justify-center shadow-md">
-                <span className="text-white text-lg sm:text-xl font-bold">🚂</span>
+              <div className="w-12 h-12 bg-indigo-600 rounded-lg flex items-center justify-center shadow-md">
+                <span className="text-white text-xl font-bold">🚂</span>
               </div>
               <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-stone-800">UPM Railway Services</h1>
-                <p className="text-stone-600 text-xs sm:text-sm">The United Pingdom of MINET</p>
+                <h1 className="text-2xl font-bold text-stone-800">{lang.portalTitle}</h1>
+                <p className="text-stone-600 text-sm">{lang.portalSubtitle}</p>
               </div>
             </div>
-            
             <div className="flex items-center space-x-4">
-              <Link href="/">
-                <button className="px-4 sm:px-6 py-2 bg-amber-600 text-white font-medium rounded-lg hover:bg-amber-700 transition-colors duration-200 shadow-sm text-sm sm:text-base">
-                  Back to Home
+              <button onClick={toggleLanguage} className="px-4 py-2 text-sm font-semibold text-indigo-600 hover:text-indigo-800">
+                {language === 'en' ? lang.changeToHindi : lang.changeToEnglish}
+              </button>
+               <Link href="/">
+                <button className="px-6 py-2 bg-amber-600 text-white font-medium rounded-lg hover:bg-amber-700 shadow-sm">
+                  {lang.backToHome}
                 </button>
               </Link>
             </div>
@@ -48,299 +265,22 @@ export default function RailwayServicesPage() {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar */}
-          <div className="w-full lg:w-1/4">
-            <div className="bg-white rounded-xl shadow-md border border-stone-200 p-6 mb-6">
-              <h2 className="text-xl font-bold text-stone-800 mb-5 border-b border-stone-200 pb-2">
-                Quick Links
-              </h2>
-              <div className="space-y-3">
-                <a href="#" className="block text-stone-600 hover:text-indigo-600 transition-colors duration-200 p-2 rounded-lg hover:bg-indigo-50">
-                  🚂 Train Schedules
-                </a>
-                <a href="#" className="block text-stone-600 hover:text-indigo-600 transition-colors duration-200 p-2 rounded-lg hover:bg-indigo-50">
-                  🎫 Book Tickets
-                </a>
-                <a href="#" className="block text-stone-600 hover:text-indigo-600 transition-colors duration-200 p-2 rounded-lg hover:bg-indigo-50">
-                  📍 Station Maps
-                </a>
-                <a href="#" className="block text-stone-600 hover:text-indigo-600 transition-colors duration-200 p-2 rounded-lg hover:bg-indigo-50">
-                  📞 Contact Support
-                </a>
-              </div>
-            </div>
-            
-            <div className="bg-indigo-50 border border-indigo-200 p-4 rounded-lg">
-              <p className="font-semibold text-indigo-800 mb-2">📢 Notice</p>
-              <p className="text-indigo-700 text-sm">
-                New express train service from Susland to Coastal City starting 25-08-2025
-              </p>
-            </div>
+      <main className="max-w-7xl mx-auto px-6 py-8">
+        <div className="bg-white rounded-xl shadow-md border border-stone-200 p-8">
+          <div className="border-b border-stone-200 mb-6">
+            <nav className="flex space-x-4">
+              <button onClick={() => setActiveTab('find_train')} className={`py-2 px-4 font-semibold ${activeTab === 'find_train' ? 'border-b-2 border-indigo-600 text-indigo-600' : 'text-stone-500'}`}>{lang.findTrain}</button>
+              <button onClick={() => setActiveTab('pnr_status')} className={`py-2 px-4 font-semibold ${activeTab === 'pnr_status' ? 'border-b-2 border-indigo-600 text-indigo-600' : 'text-stone-500'}`}>{lang.pnrStatus}</button>
+              <button onClick={() => setActiveTab('live_status')} className={`py-2 px-4 font-semibold ${activeTab === 'live_status' ? 'border-b-2 border-indigo-600 text-indigo-600' : 'text-stone-500'}`}>{lang.liveStatus}</button>
+            </nav>
           </div>
-
-          {/* Main Content */}
-          <div className="w-full lg:w-3/4">
-            <div className="bg-white rounded-xl shadow-md border border-stone-200 p-6 sm:p-8 mb-6">
-              <h2 className="text-2xl sm:text-3xl font-bold text-stone-800 mb-6 text-center">
-                Find Your Train
-              </h2>
-
-              {!showTrains ? (
-                <form onSubmit={handleSearchTrains} className="bg-stone-50 border border-stone-200 p-6 rounded-lg shadow-sm">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
-                    <div>
-                      <label className="block text-stone-700 font-semibold mb-2">
-                        From Station
-                      </label>
-                      <input
-                        type="text"
-                        value={fromStation}
-                        onChange={(e) => setFromStation(e.target.value)}
-                        className="w-full bg-white border-2 border-stone-300 p-4 rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200 text-black placeholder-stone-500"
-                        placeholder="Enter departure station"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-stone-700 font-semibold mb-2">
-                        To Station
-                      </label>
-                      <input
-                        type="text"
-                        value={toStation}
-                        onChange={(e) => setToStation(e.target.value)}
-                        className="w-full bg-white border-2 border-stone-300 p-4 rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200 text-black placeholder-stone-500"
-                        placeholder="Enter destination station"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div className="mb-5">
-                    <label className="block text-stone-700 font-semibold mb-2">
-                      Travel Date
-                    </label>
-                    <input
-                      type="date"
-                      value={date}
-                      onChange={(e) => setDate(e.target.value)}
-                      className="w-full bg-white border-2 border-stone-300 p-4 rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200 text-black"
-                      required
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full bg-indigo-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-indigo-700 transition-colors duration-200 shadow-md disabled:opacity-50"
-                  >
-                    {isLoading ? "🔍 Searching..." : "🔍 Search Trains"}
-                  </button>
-                </form>
-              ) : (
-                <div className="bg-stone-50 border border-stone-200 p-6 rounded-lg shadow-sm">
-                  <h3 className="text-xl font-bold text-stone-800 mb-5 text-center">Available Trains</h3>
-                  
-                  <div className="space-y-4 mb-6">
-                    <div className="bg-white border border-stone-200 p-4 rounded-lg">
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-3 mb-2">
-                            <span className="text-indigo-600 font-bold">🚂 UPM Express</span>
-                            <span className="text-green-600 text-sm font-semibold">Express</span>
-                          </div>
-                          <div className="text-sm text-stone-600">
-                            <div className="flex items-center space-x-2 mb-1">
-                              <span>📍 {fromStation}</span>
-                              <span className="text-indigo-500">→</span>
-                              <span>📍 {toStation}</span>
-                            </div>
-                            <div className="flex items-center space-x-4 text-xs">
-                              <span>⏰ 4h 30m</span>
-                              <span>💰 ₹120</span>
-                              <span>🕐 Daily 6:00 AM</span>
-                            </div>
-                          </div>
-                        </div>
-                        <button className="bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors duration-200 text-sm">
-                          Book Now
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="bg-white border border-stone-200 p-4 rounded-lg">
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-3 mb-2">
-                            <span className="text-indigo-600 font-bold">🚂 Coastal Link</span>
-                            <span className="text-blue-600 text-sm font-semibold">Passenger</span>
-                          </div>
-                          <div className="text-sm text-stone-600">
-                            <div className="flex items-center space-x-2 mb-1">
-                              <span>📍 {fromStation}</span>
-                              <span className="text-indigo-500">→</span>
-                              <span>📍 {toStation}</span>
-                            </div>
-                            <div className="flex items-center space-x-4 text-xs">
-                              <span>⏰ 6h 15m</span>
-                              <span>💰 ₹85</span>
-                              <span>🕐 Daily 2:30 PM</span>
-                            </div>
-                          </div>
-                        </div>
-                        <button className="bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors duration-200 text-sm">
-                          Book Now
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="bg-white border border-stone-200 p-4 rounded-lg">
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-3 mb-2">
-                            <span className="text-indigo-600 font-bold">🚂 Susland Special</span>
-                            <span className="text-purple-600 text-sm font-semibold">Premium</span>
-                          </div>
-                          <div className="text-sm text-stone-600">
-                            <div className="flex items-center space-x-2 mb-1">
-                              <span>📍 {fromStation}</span>
-                              <span className="text-indigo-500">→</span>
-                              <span>📍 {toStation}</span>
-                            </div>
-                            <div className="flex items-center space-x-4 text-xs">
-                              <span>⏰ 3h 45m</span>
-                              <span>💰 ₹180</span>
-                              <span>🕐 Daily 8:00 PM</span>
-                            </div>
-                          </div>
-                        </div>
-                        <button className="bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors duration-200 text-sm">
-                          Book Now
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-4">
-                    <button
-                      onClick={() => setShowTrains(false)}
-                      className="flex-1 bg-stone-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-stone-700 transition-colors duration-200 shadow-md"
-                    >
-                      🔍 Search Again
-                    </button>
-                    <button
-                      onClick={() => alert("Ticket booking system coming soon!")}
-                      className="flex-1 bg-green-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-green-700 transition-colors duration-200 shadow-md"
-                    >
-                      🎫 Book All Tickets
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Additional Services */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white rounded-xl shadow-md border border-stone-200 p-6">
-                <h3 className="text-lg font-bold text-stone-800 mb-4 text-center border-b border-stone-200 pb-2">
-                  Popular Routes
-                </h3>
-                <div className="space-y-3">
-                  <div className="bg-stone-50 border border-stone-200 p-3 rounded-lg hover:bg-stone-100 transition-colors cursor-pointer">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-indigo-600">🚂</span>
-                      <span className="text-sm text-stone-700">Susland ↔ Coastal City</span>
-                    </div>
-                  </div>
-                  <div className="bg-stone-50 border border-stone-200 p-3 rounded-lg hover:bg-stone-100 transition-colors cursor-pointer">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-indigo-600">🚂</span>
-                      <span className="text-sm text-stone-700">Industrial Area ↔ Port</span>
-                    </div>
-                  </div>
-                  <div className="bg-stone-50 border border-stone-200 p-3 rounded-lg hover:bg-stone-100 transition-colors cursor-pointer">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-indigo-600">🚂</span>
-                      <span className="text-sm text-stone-700">University ↔ Airport</span>
-                    </div>
-                  </div>
-                </div>
-                <button className="w-full mt-4 bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors duration-200">
-                  View All Routes
-                </button>
-              </div>
-
-              <div className="bg-white rounded-xl shadow-md border border-stone-200 p-6">
-                <h3 className="text-lg font-bold text-stone-800 mb-4 text-center border-b border-stone-200 pb-2">
-                  Travel Classes
-                </h3>
-                <div className="space-y-3">
-                  <div className="bg-stone-50 border border-stone-200 p-3 rounded-lg hover:bg-stone-100 transition-colors cursor-pointer">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-green-600">🎫</span>
-                      <span className="text-sm text-stone-700">General Class - ₹85</span>
-                    </div>
-                  </div>
-                  <div className="bg-stone-50 border border-stone-200 p-3 rounded-lg hover:bg-stone-100 transition-colors cursor-pointer">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-green-600">🎫</span>
-                      <span className="text-sm text-stone-700">Sleeper Class - ₹120</span>
-                    </div>
-                  </div>
-                  <div className="bg-stone-50 border border-stone-200 p-3 rounded-lg hover:bg-stone-100 transition-colors cursor-pointer">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-green-600">🎫</span>
-                      <span className="text-sm text-stone-700">AC 3 Tier - ₹180</span>
-                    </div>
-                  </div>
-                </div>
-                <button className="w-full mt-4 bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors duration-200">
-                  View Classes
-                </button>
-              </div>
-            </div>
-          </div>
+          {renderContent()}
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-stone-800 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-            <div>
-              <h4 className="text-xl font-bold mb-4 text-indigo-400">UPM Railway Services</h4>
-              <p className="text-stone-300 text-sm">
-                The United Pingdom of MINET<br />
-                Connecting cities since 1999
-              </p>
-            </div>
-            <div>
-              <h4 className="text-xl font-bold mb-4 text-indigo-400">Quick Links</h4>
-              <ul className="space-y-2 text-stone-300 text-sm">
-                <li><a href="#" className="hover:text-indigo-400 transition-colors">Train Timings</a></li>
-                <li><a href="#" className="hover:text-indigo-400 transition-colors">Fare Calculator</a></li>
-                <li><a href="#" className="hover:text-indigo-400 transition-colors">Help & Support</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-xl font-bold mb-4 text-indigo-400">Contact Info</h4>
-              <div className="text-stone-300 text-sm space-y-2">
-                <p>🚂 Railway Complex, Susland</p>
-                <p>📞 1-800-UPM-RAIL</p>
-                <p>📧 railway@upm.gov.minet</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="border-t border-stone-700 pt-8 text-center">
-            <p className="text-stone-400 text-sm">
-              © 1999-2025 United Pingdom of MINET - All Rights Reserved
-            </p>
-            <p className="text-xs text-stone-500 mt-2">
-              Optimized for all modern browsers and devices
-            </p>
-          </div>
+      <footer className="bg-stone-800 text-white py-12 mt-8">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <p className="text-stone-400 text-sm">{lang.rightsReserved}</p>
         </div>
       </footer>
     </div>
