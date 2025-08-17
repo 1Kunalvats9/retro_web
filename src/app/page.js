@@ -2,16 +2,34 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import LoadingSpinner from "../components/LoadingSpinner";
+import StatusMessage from "../components/StatusMessage";
+import VisualButton from "../components/VisualButton";
 
 export default function Home() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showSignupModal, setShowSignupModal] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoggedIn, setisLoggedIn] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [statusMessage, setStatusMessage] = useState(null);
+  const [user, setUser] = useState(null);
+
+  // Check if user is already logged in on component mount
+  useEffect(() => {
+    const savedUser = localStorage.getItem('upm_user');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+      setIsLoggedIn(true);
+    }
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+    setStatusMessage(null);
+    
     try {
       const response = await fetch("/api/auth/login", {
         method: "POST",
@@ -22,20 +40,31 @@ export default function Home() {
       });
       
       if (response.ok) {
-        alert("Login successful!");
+        const data = await response.json();
+        setUser(data.user);
+        setIsLoggedIn(true);
+        localStorage.setItem('upm_user', JSON.stringify(data.user));
         setShowLoginModal(false);
-        setisLoggedIn(true)
+        setUsername("");
+        setPassword("");
+        setStatusMessage({ type: 'success', message: 'Welcome back! Login successful.' });
       } else {
-        alert("Login failed. Please check your credentials.");
+        const errorData = await response.json();
+        setStatusMessage({ type: 'error', message: errorData.error || 'Login failed. Please check your credentials.' });
       }
     } catch (error) {
       console.error("Login error:", error);
-      alert("An error occurred during login.");
+      setStatusMessage({ type: 'error', message: 'Network error. Please try again.' });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleSignup = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+    setStatusMessage(null);
+    
     try {
       const response = await fetch("/api/auth/signup", {
         method: "POST",
@@ -46,26 +75,48 @@ export default function Home() {
       });
       
       if (response.ok) {
-        alert("Account created successfully!");
+        const data = await response.json();
         setShowSignupModal(false);
+        setUsername("");
+        setPassword("");
+        setStatusMessage({ type: 'success', message: 'Account created successfully! You can now sign in.' });
       } else {
-        alert("Signup failed. Please try again.");
+        const errorData = await response.json();
+        setStatusMessage({ type: 'error', message: errorData.error || 'Signup failed. Please try again.' });
       }
     } catch (error) {
       console.error("Signup error:", error);
-      alert("An error occurred during signup.");
+      setStatusMessage({ type: 'error', message: 'Network error. Please try again.' });
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setUser(null);
+    localStorage.removeItem('upm_user');
+    setStatusMessage({ type: 'info', message: 'You have been logged out successfully.' });
   };
 
   return (
     <div className="min-h-screen bg-stone-50 font-['Inter', 'Segoe UI', sans-serif]">
+      {/* Status Messages */}
+      {statusMessage && (
+        <StatusMessage
+          type={statusMessage.type}
+          message={statusMessage.message}
+          onClose={() => setStatusMessage(null)}
+        />
+      )}
+
       {/* Modern Header */}
       <header className="bg-white shadow-sm border-b border-stone-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-amber-600 rounded-lg flex items-center justify-center shadow-md">
-                <span className="text-white text-lg sm:text-xl font-bold">U</span>
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-lg flex items-center justify-center shadow-lg">
+                <span className="text-white text-lg sm:text-xl font-bold">🏛️</span>
               </div>
               <div>
                 <h1 className="text-xl sm:text-2xl font-bold text-stone-800">UPM Government Portal</h1>
@@ -74,25 +125,50 @@ export default function Home() {
             </div>
             
             <div className="flex items-center space-x-4">
-              <button 
-                onClick={() => setShowLoginModal(true)}
-                className="px-4 sm:px-6 py-2 bg-amber-600 text-white font-medium rounded-lg hover:bg-amber-700 transition-colors duration-200 shadow-sm text-sm sm:text-base"
-              >
-                Sign In
-              </button>
-              <button 
-                onClick={() => setShowSignupModal(true)}
-                className="px-4 sm:px-6 py-2 border border-amber-600 text-amber-600 font-medium rounded-lg hover:bg-amber-50 transition-colors duration-200 text-sm sm:text-base"
-              >
-                Create Account
-              </button>
+              {isLoggedIn ? (
+                <div className="flex items-center space-x-4">
+                  <div className="text-sm">
+                    <span className="text-stone-600">Welcome,</span>
+                    <span className="font-semibold text-stone-800 ml-1">{user?.userName}</span>
+                  </div>
+                  <button 
+                    onClick={handleLogout}
+                    className="px-4 sm:px-6 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-all duration-300 shadow-sm text-sm sm:text-base btn-primary"
+                  >
+                    🚪 Sign Out
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <button 
+                    onClick={() => setShowLoginModal(true)}
+                    className="px-4 sm:px-6 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-medium rounded-lg hover:from-amber-600 hover:to-amber-700 transition-all duration-300 shadow-sm text-sm sm:text-base btn-primary"
+                  >
+                    🔐 Sign In
+                  </button>
+                  <button 
+                    onClick={() => setShowSignupModal(true)}
+                    className="px-4 sm:px-6 py-2 border-2 border-amber-600 text-amber-600 font-medium rounded-lg hover:bg-amber-50 transition-all duration-300 text-sm sm:text-base btn-secondary"
+                  >
+                    ✨ Create Account
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-amber-50 to-stone-100 py-16">
+      <section className="bg-gradient-to-br from-amber-50 via-orange-50 to-stone-100 py-16 relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute top-10 left-10 text-6xl">🏛️</div>
+          <div className="absolute top-20 right-20 text-4xl">⚡</div>
+          <div className="absolute bottom-20 left-20 text-5xl">💧</div>
+          <div className="absolute bottom-10 right-10 text-4xl">🚌</div>
+        </div>
+        
         <div className="max-w-7xl mx-auto px-6 text-center">
           <h2 className="text-4xl md:text-5xl font-bold text-stone-800 mb-6">
             Welcome to UPM Digital Services
@@ -103,22 +179,22 @@ export default function Home() {
           </p>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            <div className="bg-white p-6 rounded-xl shadow-md border border-stone-200">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="bg-white p-6 rounded-xl shadow-lg border border-stone-200 hover:shadow-xl transition-all duration-300 service-card">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">👥</span>
               </div>
               <h3 className="font-semibold text-stone-800 mb-2">Population</h3>
               <p className="text-blue-600 font-bold text-lg">6.9 Million</p>
             </div>
-            <div className="bg-white p-6 rounded-xl shadow-md border border-stone-200">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="bg-white p-6 rounded-xl shadow-lg border border-stone-200 hover:shadow-xl transition-all duration-300 service-card">
+              <div className="w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">🏛️</span>
               </div>
               <h3 className="font-semibold text-stone-800 mb-2">Capital</h3>
               <p className="text-green-600 font-bold text-lg">Susland</p>
             </div>
-            <div className="bg-white p-6 rounded-xl shadow-md border border-stone-200">
-              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="bg-white p-6 rounded-xl shadow-lg border border-stone-200 hover:shadow-xl transition-all duration-300 service-card">
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">🌐</span>
               </div>
               <h3 className="font-semibold text-stone-800 mb-2">Internet</h3>
@@ -133,16 +209,17 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
             <h3 className="text-3xl font-bold text-stone-800 mb-4">Government Services</h3>
-            <p className="text-stone-600 text-lg">Access essential services from the comfort of your home</p>
+            <p className="text-stone-600 text-lg mb-2">Access essential services from the comfort of your home</p>
+            <p className="text-stone-500 text-sm">👆 Click on any service below to get started</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               { 
                 name: "Electricity Services", 
                 icon: "⚡", 
                 path: "/services/electricity", 
-                color: "bg-yellow-100 border-yellow-200",
+                color: "yellow",
                 iconColor: "text-yellow-600",
                 description: "Pay bills, check consumption, report outages"
               },
@@ -150,7 +227,7 @@ export default function Home() {
                 name: "Water & Sanitation", 
                 icon: "💧", 
                 path: "/services/water", 
-                color: "bg-blue-100 border-blue-200",
+                color: "blue",
                 iconColor: "text-blue-600",
                 description: "Water billing, maintenance requests"
               },
@@ -158,7 +235,7 @@ export default function Home() {
                 name: "Education Portal", 
                 icon: "📚", 
                 path: "/services/education", 
-                color: "bg-purple-100 border-purple-200",
+                color: "purple",
                 iconColor: "text-purple-600",
                 description: "Student records, scholarship applications"
               },
@@ -166,7 +243,7 @@ export default function Home() {
                 name: "Citizen Benefits", 
                 icon: "📋", 
                 path: "/services/schemes", 
-                color: "bg-green-100 border-green-200",
+                color: "green",
                 iconColor: "text-green-600",
                 description: "Social schemes, welfare programs"
               },
@@ -174,7 +251,7 @@ export default function Home() {
                 name: "Public Transport", 
                 icon: "🚌", 
                 path: "/services/transport", 
-                color: "bg-red-100 border-red-200",
+                color: "red",
                 iconColor: "text-red-600",
                 description: "Bus schedules, route information"
               },
@@ -182,27 +259,19 @@ export default function Home() {
                 name: "Railway Services", 
                 icon: "🚂", 
                 path: "/services/railway", 
-                color: "bg-indigo-100 border-indigo-200",
+                color: "indigo",
                 iconColor: "text-indigo-600",
                 description: "Ticket booking, train schedules"
               },
             ].map((service, index) => (
               <Link href={service.path} key={index}>
-                <div className="group bg-white rounded-xl p-8 shadow-md hover:shadow-lg transition-all duration-300 border border-stone-200 hover:border-amber-300 cursor-pointer">
-                  <div className={`inline-flex items-center justify-center w-20 h-20 ${service.color} rounded-xl mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                    <span className={`text-4xl ${service.iconColor}`}>{service.icon}</span>
-                  </div>
-                  <h4 className="text-xl font-bold text-stone-800 mb-3 group-hover:text-amber-600 transition-colors duration-300">
-                    {service.name}
-                  </h4>
-                  <p className="text-stone-600 mb-4 leading-relaxed">
-                    {service.description}
-                  </p>
-                  <div className="flex items-center text-amber-600 font-semibold group-hover:text-amber-700 transition-colors duration-300">
-                    <span>Access Service</span>
-                    <span className="ml-2 text-lg group-hover:translate-x-1 transition-transform duration-300">→</span>
-                  </div>
-                </div>
+                <VisualButton
+                  icon={service.icon}
+                  text={service.name}
+                  description={service.description}
+                  color={service.color}
+                  size="lg"
+                />
               </Link>
             ))}
           </div>
@@ -219,13 +288,13 @@ export default function Home() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
-              { icon: "🔒", title: "Bank-Level Security", description: "256-bit encryption, secure servers" },
+              { icon: "🔒", title: "Bank-Level Security", description: "Your data is protected with advanced encryption" },
               { icon: "📱", title: "Low-Bandwidth Optimized", description: "Works on dial-up connections" },
               { icon: "🏛️", title: "Government Backed", description: "Official UPM government website" },
               { icon: "📞", title: "24/7 Support", description: "Call center for assistance" }
             ].map((feature, index) => (
-              <div key={index} className="text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-amber-100 rounded-full mb-4">
+              <div key={index} className="text-center group">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-amber-100 to-amber-200 rounded-full mb-4 group-hover:scale-110 transition-transform duration-300">
                   <span className="text-2xl">{feature.icon}</span>
                 </div>
                 <h4 className="text-lg font-bold text-stone-800 mb-2">{feature.title}</h4>
@@ -245,23 +314,23 @@ export default function Home() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white p-6 rounded-xl shadow-md border border-stone-200">
+            <div className="bg-white p-6 rounded-xl shadow-lg border border-stone-200 hover:shadow-xl transition-all duration-300 service-card">
               <div className="flex items-center space-x-3 mb-4">
-                <span className="text-green-600 font-bold text-sm">NEW</span>
+                <span className="bg-green-100 text-green-800 font-bold text-sm px-3 py-1 rounded-full">🆕 NEW</span>
                 <span className="text-stone-400 text-sm">2 hours ago</span>
               </div>
               <p className="text-stone-700">Citizen ID verification system now available online</p>
             </div>
-            <div className="bg-white p-6 rounded-xl shadow-md border border-stone-200">
+            <div className="bg-white p-6 rounded-xl shadow-lg border border-stone-200 hover:shadow-xl transition-all duration-300 service-card">
               <div className="flex items-center space-x-3 mb-4">
-                <span className="text-blue-600 font-bold text-sm">UPDATE</span>
+                <span className="bg-blue-100 text-blue-800 font-bold text-sm px-3 py-1 rounded-full">🔄 UPDATE</span>
                 <span className="text-stone-400 text-sm">1 day ago</span>
               </div>
               <p className="text-stone-700">Electricity bill payment portal upgraded for better security</p>
             </div>
-            <div className="bg-white p-6 rounded-xl shadow-md border border-stone-200">
+            <div className="bg-white p-6 rounded-xl shadow-lg border border-stone-200 hover:shadow-xl transition-all duration-300 service-card">
               <div className="flex items-center space-x-3 mb-4">
-                <span className="text-amber-600 font-bold text-sm">NOTICE</span>
+                <span className="bg-amber-100 text-amber-800 font-bold text-sm px-3 py-1 rounded-full">📢 NOTICE</span>
                 <span className="text-stone-400 text-sm">3 days ago</span>
               </div>
               <p className="text-stone-700">System maintenance scheduled for Sunday 2AM-4AM</p>
@@ -320,10 +389,10 @@ export default function Home() {
 
       {/* Login Modal */}
       {showLoginModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl p-8 w-full max-w-md shadow-2xl">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 fade-in">
+          <div className="bg-white rounded-xl p-8 w-full max-w-md shadow-2xl slide-in">
             <div className="text-center mb-6">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-amber-600 rounded-full mb-4">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full mb-4 shadow-lg">
                 <span className="text-2xl text-white">🔐</span>
               </div>
               <h2 className="text-2xl font-bold text-stone-800">Welcome Back</h2>
@@ -337,8 +406,9 @@ export default function Home() {
                   type="text" 
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full bg-white border-2 border-stone-300 p-4 rounded-lg focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-all duration-200 text-black placeholder-stone-500"
+                  className="w-full bg-white border-2 border-stone-300 p-4 rounded-lg focus:outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-200 transition-all duration-300 text-black placeholder-stone-500 input-field"
                   placeholder="Enter your username"
+                  disabled={isLoading}
                   required
                 />
               </div>
@@ -348,22 +418,35 @@ export default function Home() {
                   type="password" 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-white border-2 border-stone-300 p-4 rounded-lg focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-all duration-200 text-black placeholder-stone-500"
+                  className="w-full bg-white border-2 border-stone-300 p-4 rounded-lg focus:outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-200 transition-all duration-300 text-black placeholder-stone-500 input-field"
                   placeholder="Enter your password"
+                  disabled={isLoading}
                   required
                 />
               </div>
               <button 
                 type="submit"
-                className="w-full bg-amber-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-amber-700 transition-colors duration-200 shadow-md"
+                disabled={isLoading}
+                className="w-full bg-gradient-to-r from-amber-500 to-amber-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-amber-600 hover:to-amber-700 transition-all duration-300 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed btn-primary flex items-center justify-center space-x-2"
               >
-                Sign In
+                {isLoading ? (
+                  <>
+                    <LoadingSpinner size="sm" color="white" />
+                    <span>Signing In...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>🔐</span>
+                    <span>Sign In</span>
+                  </>
+                )}
               </button>
               <div className="text-center">
                 <button 
                   type="button"
                   onClick={() => setShowLoginModal(false)}
-                  className="text-stone-500 hover:text-stone-700 font-medium transition-colors duration-200"
+                  disabled={isLoading}
+                  className="text-stone-500 hover:text-stone-700 font-medium transition-colors duration-200 disabled:opacity-50"
                 >
                   Cancel
                 </button>
@@ -375,10 +458,10 @@ export default function Home() {
 
       {/* Signup Modal */}
       {showSignupModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl p-8 w-full max-w-md shadow-2xl">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 fade-in">
+          <div className="bg-white rounded-xl p-8 w-full max-w-md shadow-2xl slide-in">
             <div className="text-center mb-6">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-green-600 rounded-full mb-4">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full mb-4 shadow-lg">
                 <span className="text-2xl text-white">✨</span>
               </div>
               <h2 className="text-2xl font-bold text-stone-800">Create Account</h2>
@@ -392,8 +475,9 @@ export default function Home() {
                   type="text" 
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full bg-white border-2 border-stone-300 p-4 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 text-black placeholder-stone-500"
+                  className="w-full bg-white border-2 border-stone-300 p-4 rounded-lg focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-200 transition-all duration-300 text-black placeholder-stone-500 input-field"
                   placeholder="Enter your username"
+                  disabled={isLoading}
                   required
                 />
               </div>
@@ -403,22 +487,35 @@ export default function Home() {
                   type="password" 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-white border-2 border-stone-300 p-4 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 text-black placeholder-stone-500"
+                  className="w-full bg-white border-2 border-stone-300 p-4 rounded-lg focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-200 transition-all duration-300 text-black placeholder-stone-500 input-field"
                   placeholder="Enter your password"
+                  disabled={isLoading}
                   required
                 />
               </div>
               <button 
                 type="submit"
-                className="w-full bg-green-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-green-700 transition-colors duration-200 shadow-md"
+                disabled={isLoading}
+                className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed btn-primary flex items-center justify-center space-x-2"
               >
-                Create Account
+                {isLoading ? (
+                  <>
+                    <LoadingSpinner size="sm" color="white" />
+                    <span>Creating Account...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>✨</span>
+                    <span>Create Account</span>
+                  </>
+                )}
               </button>
               <div className="text-center">
                 <button 
                   type="button"
                   onClick={() => setShowSignupModal(false)}
-                  className="text-stone-500 hover:text-stone-700 font-medium transition-colors duration-200"
+                  disabled={isLoading}
+                  className="text-stone-500 hover:text-stone-700 font-medium transition-colors duration-200 disabled:opacity-50"
                 >
                   Cancel
                 </button>
