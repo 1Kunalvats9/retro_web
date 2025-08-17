@@ -1,235 +1,304 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
+import { useState } from "react";
+import Link from "next/link";
 
-const educationData = [
-  {
-    id: 1,
-    title: "PM Poshan Shakti Nirman (Mid-Day Meal Scheme)",
-    description: "Free nutritious meals for students in government and government-aided schools from classes 1-8",
-    eligibility: "Students in government schools, classes 1-8",
-    benefits: "Free lunch, improved nutrition, increased attendance",
-    applicationProcess: "Automatic enrollment for students in eligible schools",
-    contact: "Ministry of Education, Government of India",
-    website: "https://education.gov.in/mid-day-meal",
-    category: "Nutrition"
-  },
-  {
-    id: 2,
-    title: "Beti Bachao Beti Padhao",
-    description: "Comprehensive scheme for girl child education, protection, and empowerment",
-    eligibility: "Girl students from birth to 18 years",
-    benefits: "Education support, skill development, financial assistance",
-    applicationProcess: "Contact local Anganwadi centers or schools",
-    contact: "Ministry of Women and Child Development",
-    website: "https://wcd.nic.in/bbbp",
-    category: "Girl Child Education"
-  },
-  {
-    id: 3,
-    title: "PM Vidya Lakshmi Portal",
-    description: "Centralized portal for education loans from multiple banks",
-    eligibility: "Students pursuing higher education in India or abroad",
-    benefits: "Easy loan application, multiple bank options, tracking",
-    applicationProcess: "Online application through portal",
-    contact: "Department of Financial Services",
-    website: "https://www.vidyalakshmi.co.in",
-    category: "Education Loans"
-  },
-  {
-    id: 4,
-    title: "National Scholarship Portal",
-    description: "One-stop solution for various government scholarships",
-    eligibility: "Students from different categories (SC/ST/OBC/Minority)",
-    benefits: "Financial assistance for education, merit-based support",
-    applicationProcess: "Online application with required documents",
-    contact: "Ministry of Electronics and IT",
-    website: "https://scholarships.gov.in",
-    category: "Scholarships"
-  },
-  {
-    id: 5,
-    title: "Skill India Mission",
-    description: "Skill development and vocational training programs",
-    eligibility: "Youth aged 15-45 years",
-    benefits: "Free training, certification, job placement assistance",
-    applicationProcess: "Register at nearest training center",
-    contact: "Ministry of Skill Development and Entrepreneurship",
-    website: "https://www.msde.gov.in/skill-india",
-    category: "Skill Development"
-  },
-  {
-    id: 6,
-    title: "Digital India e-Learning",
-    description: "Free online courses and digital learning resources",
-    eligibility: "All students and learners",
-    benefits: "Free courses, certificates, flexible learning",
-    applicationProcess: "Direct access through portal",
-    contact: "Ministry of Electronics and IT",
-    website: "https://www.digitalindia.gov.in",
-    category: "Digital Learning"
-  },
-  {
-    id: 7,
-    title: "PM Kaushal Vikas Yojana",
-    description: "Short-term skill training for unemployed youth",
-    eligibility: "Unemployed youth aged 15-45 years",
-    benefits: "Free training, stipend, placement support",
-    applicationProcess: "Online registration or visit training centers",
-    contact: "National Skill Development Corporation",
-    website: "https://pmkvyofficial.org",
-    category: "Vocational Training"
-  },
-  {
-    id: 8,
-    title: "National Education Policy 2020 Implementation",
-    description: "Comprehensive reforms in education system",
-    eligibility: "All students and educational institutions",
-    benefits: "Modern curriculum, skill integration, holistic development",
-    applicationProcess: "Implemented through schools and colleges",
-    contact: "Ministry of Education",
-    website: "https://education.gov.in/nep",
-    category: "Policy Implementation"
-  }
-];
+export default function EducationPortalPage() {
+  const [studentId, setStudentId] = useState("");
+  const [showResults, setShowResults] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-const categories = ["All", "Nutrition", "Girl Child Education", "Education Loans", "Scholarships", "Skill Development", "Digital Learning", "Vocational Training", "Policy Implementation"];
-
-export default function EducationPage() {
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [searchTerm, setSearchTerm] = useState("");
-
-  const filteredData = educationData.filter(item => {
-    const matchesCategory = selectedCategory === "All" || item.category === selectedCategory;
-    const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.description.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  const handleCheckResults = (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    // Simulate API call with timeout
+    setTimeout(() => {
+      setShowResults(true);
+      setIsLoading(false);
+    }, 1500);
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Educational Resources & Schemes
-          </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Discover government educational programs, scholarships, and resources available for students across India
-          </p>
-        </div>
-
-        {/* Search and Filter */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <input
-                type="text"
-                placeholder="Search educational resources..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+    <div className="min-h-screen bg-stone-50 font-['Inter', 'Segoe UI', sans-serif]">
+      {/* Modern Header */}
+      <header className="bg-white shadow-sm border-b border-stone-200">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center shadow-md">
+                <span className="text-white text-xl font-bold">📚</span>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-stone-800">UPM Education Portal</h1>
+                <p className="text-stone-600 text-sm">The United Pingdom of MINET</p>
+              </div>
             </div>
-            <div className="md:w-64">
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                {categories.map(category => (
-                  <option key={category} value={category}>{category}</option>
-                ))}
-              </select>
+            
+            <div className="flex items-center space-x-4">
+              <Link href="/">
+                <button className="px-6 py-2 bg-amber-600 text-white font-medium rounded-lg hover:bg-amber-700 transition-colors duration-200 shadow-sm">
+                  Back to Home
+                </button>
+              </Link>
             </div>
           </div>
         </div>
+      </header>
 
-        {/* Resources Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredData.map((resource) => (
-            <div key={resource.id} className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
-                    {resource.category}
-                  </span>
-                </div>
-                
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                  {resource.title}
-                </h3>
-                
-                <p className="text-gray-600 mb-4 line-clamp-3">
-                  {resource.description}
-                </p>
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-6 py-8">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Sidebar */}
+          <div className="w-full lg:w-1/4">
+            <div className="bg-white rounded-xl shadow-md border border-stone-200 p-6 mb-6">
+              <h2 className="text-xl font-bold text-stone-800 mb-5 border-b border-stone-200 pb-2">
+                Quick Links
+              </h2>
+              <div className="space-y-3">
+                <a href="#" className="block text-stone-600 hover:text-purple-600 transition-colors duration-200 p-2 rounded-lg hover:bg-purple-50">
+                  📊 View Academic Records
+                </a>
+                <a href="#" className="block text-stone-600 hover:text-purple-600 transition-colors duration-200 p-2 rounded-lg hover:bg-purple-50">
+                  🎓 Apply for Scholarships
+                </a>
+                <a href="#" className="block text-stone-600 hover:text-purple-600 transition-colors duration-200 p-2 rounded-lg hover:bg-purple-50">
+                  📝 Download Certificates
+                </a>
+                <a href="#" className="block text-stone-600 hover:text-purple-600 transition-colors duration-200 p-2 rounded-lg hover:bg-purple-50">
+                  📞 Contact Support
+                </a>
+              </div>
+            </div>
+            
+            <div className="bg-purple-50 border border-purple-200 p-4 rounded-lg">
+              <p className="font-semibold text-purple-800 mb-2">📢 Notice</p>
+              <p className="text-purple-700 text-sm">
+                Scholarship applications for 2025-26 academic year are now open. Deadline: 30-09-2025
+              </p>
+            </div>
+          </div>
 
-                <div className="space-y-2 mb-4">
-                  <div>
-                    <span className="font-medium text-gray-700">Eligibility:</span>
-                    <p className="text-gray-600 text-sm">{resource.eligibility}</p>
+          {/* Main Content */}
+          <div className="w-full lg:w-3/4">
+            <div className="bg-white rounded-xl shadow-md border border-stone-200 p-8 mb-6">
+              <h2 className="text-3xl font-bold text-stone-800 mb-6 text-center">
+                Student Portal Access
+              </h2>
+
+              {!showResults ? (
+                <form onSubmit={handleCheckResults} className="bg-stone-50 border border-stone-200 p-6 rounded-lg shadow-sm">
+                  <div className="mb-5">
+                    <label className="block text-stone-700 font-semibold mb-2">
+                      Student ID
+                    </label>
+                    <input
+                      type="text"
+                      value={studentId}
+                      onChange={(e) => setStudentId(e.target.value)}
+                      className="w-full bg-white border-2 border-stone-300 p-4 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 text-black placeholder-stone-500"
+                      placeholder="Enter your student ID"
+                      required
+                    />
+                    <p className="text-stone-500 text-sm mt-1">* Enter your registered student ID</p>
                   </div>
-                  <div>
-                    <span className="font-medium text-gray-700">Benefits:</span>
-                    <p className="text-gray-600 text-sm">{resource.benefits}</p>
-                  </div>
-                </div>
-
-                <div className="border-t pt-4">
-                  <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
-                    <span>Contact: {resource.contact}</span>
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full bg-purple-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-purple-700 transition-colors duration-200 shadow-md disabled:opacity-50"
+                  >
+                    {isLoading ? "🔍 Checking..." : "🔍 Check Results"}
+                  </button>
+                </form>
+              ) : (
+                <div className="bg-stone-50 border border-stone-200 p-6 rounded-lg shadow-sm">
+                  <h3 className="text-xl font-bold text-stone-800 mb-5 text-center">Academic Results</h3>
+                  <div className="bg-white border border-stone-200 p-5 mb-6 rounded-lg">
+                    <div className="flex justify-between border-b border-stone-200 pb-3 mb-3">
+                      <span className="font-semibold text-stone-700">Student ID:</span>
+                      <span className="text-stone-800 font-mono">{studentId}</span>
+                    </div>
+                    <div className="flex justify-between border-b border-stone-200 pb-3 mb-3">
+                      <span className="font-semibold text-stone-700">Academic Year:</span>
+                      <span className="text-stone-800">2024-25</span>
+                    </div>
+                    <div className="flex justify-between border-b border-stone-200 pb-3 mb-3">
+                      <span className="font-semibold text-stone-700">Semester:</span>
+                      <span className="text-stone-800">2nd Semester</span>
+                    </div>
+                    <div className="flex justify-between text-lg">
+                      <span className="font-semibold text-stone-700">CGPA:</span>
+                      <span className="font-bold text-green-600">8.7/10</span>
+                    </div>
                   </div>
                   
-                  <div className="flex gap-2">
-                    <a
-                      href={resource.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1 bg-blue-600 text-white text-center py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div className="bg-white border border-stone-200 p-4 rounded-lg">
+                      <h4 className="font-semibold text-stone-800 mb-2">Subject-wise Marks</h4>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span>Mathematics:</span>
+                          <span className="font-semibold text-green-600">85/100</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Physics:</span>
+                          <span className="font-semibold text-green-600">88/100</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Chemistry:</span>
+                          <span className="font-semibold text-green-600">82/100</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>English:</span>
+                          <span className="font-semibold text-green-600">90/100</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-white border border-stone-200 p-4 rounded-lg">
+                      <h4 className="font-semibold text-stone-800 mb-2">Performance Summary</h4>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span>Total Marks:</span>
+                          <span className="font-semibold">345/400</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Percentage:</span>
+                          <span className="font-semibold text-green-600">86.25%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Grade:</span>
+                          <span className="font-semibold text-blue-600">A</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Rank:</span>
+                          <span className="font-semibold text-purple-600">15/120</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-4">
+                    <button
+                      onClick={() => setShowResults(false)}
+                      className="flex-1 bg-purple-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-purple-700 transition-colors duration-200 shadow-md"
                     >
-                      Visit Website
-                    </a>
-                    <button className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors duration-200">
-                      Apply Now
+                      🔍 Check Another
+                    </button>
+                    <button
+                      onClick={() => window.print()}
+                      className="flex-1 bg-amber-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-amber-700 transition-colors duration-200 shadow-md"
+                    >
+                      🖨️ Print Results
                     </button>
                   </div>
                 </div>
+              )}
+            </div>
+
+            {/* Additional Services */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-white rounded-xl shadow-md border border-stone-200 p-6">
+                <h3 className="text-lg font-bold text-stone-800 mb-4 text-center border-b border-stone-200 pb-2">
+                  Scholarship Applications
+                </h3>
+                <div className="space-y-3">
+                  <div className="bg-green-50 border border-green-200 p-3 rounded-lg">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-green-600">✅</span>
+                      <span className="text-sm text-green-800">Merit-based Scholarships</span>
+                    </div>
+                  </div>
+                  <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-blue-600">✅</span>
+                      <span className="text-sm text-blue-800">Need-based Financial Aid</span>
+                    </div>
+                  </div>
+                  <div className="bg-purple-50 border border-purple-200 p-3 rounded-lg">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-purple-600">✅</span>
+                      <span className="text-sm text-purple-800">Sports Excellence Awards</span>
+                    </div>
+                  </div>
+                </div>
+                <button className="w-full mt-4 bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors duration-200">
+                  Apply Now
+                </button>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-md border border-stone-200 p-6">
+                <h3 className="text-lg font-bold text-stone-800 mb-4 text-center border-b border-stone-200 pb-2">
+                  Document Downloads
+                </h3>
+                <div className="space-y-3">
+                  <div className="bg-stone-50 border border-stone-200 p-3 rounded-lg hover:bg-stone-100 transition-colors cursor-pointer">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-stone-600">📄</span>
+                      <span className="text-sm text-stone-700">Academic Transcripts</span>
+                    </div>
+                  </div>
+                  <div className="bg-stone-50 border border-stone-200 p-3 rounded-lg hover:bg-stone-100 transition-colors cursor-pointer">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-stone-600">🎓</span>
+                      <span className="text-sm text-stone-700">Degree Certificates</span>
+                    </div>
+                  </div>
+                  <div className="bg-stone-50 border border-stone-200 p-3 rounded-lg hover:bg-stone-100 transition-colors cursor-pointer">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-stone-600">📋</span>
+                      <span className="text-sm text-stone-700">Character Certificates</span>
+                    </div>
+                  </div>
+                </div>
+                <button className="w-full mt-4 bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                  Download All
+                </button>
               </div>
             </div>
-          ))}
+          </div>
         </div>
+      </main>
 
-        {/* Quick Stats */}
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="bg-white rounded-lg shadow-lg p-6 text-center">
-            <div className="text-3xl font-bold text-blue-600 mb-2">{educationData.length}</div>
-            <div className="text-gray-600">Total Programs</div>
+      {/* Footer */}
+      <footer className="bg-stone-800 text-white py-12">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+            <div>
+              <h4 className="text-xl font-bold mb-4 text-purple-400">UPM Education Portal</h4>
+              <p className="text-stone-300 text-sm">
+                The United Pingdom of MINET<br />
+                Empowering minds since 1999
+              </p>
+            </div>
+            <div>
+              <h4 className="text-xl font-bold mb-4 text-purple-400">Quick Links</h4>
+              <ul className="space-y-2 text-stone-300 text-sm">
+                <li><a href="#" className="hover:text-purple-400 transition-colors">Academic Calendar</a></li>
+                <li><a href="#" className="hover:text-purple-400 transition-colors">Student Handbook</a></li>
+                <li><a href="#" className="hover:text-purple-400 transition-colors">Help & Support</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-xl font-bold mb-4 text-purple-400">Contact Info</h4>
+              <div className="text-stone-300 text-sm space-y-2">
+                <p>📚 Education Complex, Susland</p>
+                <p>📞 1-800-UPM-EDU</p>
+                <p>📧 education@upm.gov.minet</p>
+              </div>
+            </div>
           </div>
-          <div className="bg-white rounded-lg shadow-lg p-6 text-center">
-            <div className="text-3xl font-bold text-green-600 mb-2">8</div>
-            <div className="text-gray-600">Categories</div>
-          </div>
-          <div className="bg-white rounded-lg shadow-lg p-6 text-center">
-            <div className="text-3xl font-bold text-purple-600 mb-2">100%</div>
-            <div className="text-gray-600">Free Access</div>
-          </div>
-          <div className="bg-white rounded-lg shadow-lg p-6 text-center">
-            <div className="text-3xl font-bold text-orange-600 mb-2">24/7</div>
-            <div className="text-gray-600">Online Support</div>
+          
+          <div className="border-t border-stone-700 pt-8 text-center">
+            <p className="text-stone-400 text-sm">
+              © 1999-2025 United Pingdom of MINET - All Rights Reserved
+            </p>
+            <p className="text-xs text-stone-500 mt-2">
+              Optimized for all modern browsers and devices
+            </p>
           </div>
         </div>
-
-        {/* Back to Services */}
-        <div className="mt-12 text-center">
-          <Link 
-            href="/services"
-            className="inline-flex items-center px-6 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-colors duration-200"
-          >
-            ← Back to Services
-          </Link>
-        </div>
-      </div>
+      </footer>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../../../../generated/prisma';
 import { NextResponse } from 'next/server';
 
 const prisma = new PrismaClient();
@@ -15,7 +15,6 @@ export async function POST(request) {
       );
     }
 
-    // Check if user already exists
     const existingUser = await prisma.user.findFirst({
       where: {
         userName: userName,
