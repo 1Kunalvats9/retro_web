@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from 'next/link';
 
 // --- Language Translations ---
 const translations = {
@@ -12,17 +11,16 @@ const translations = {
     findRoute: "Find Route",
     liveTracking: "Live Tracking",
     buyPass: "Buy a Pass",
-    fromLocation: "From Location",
-    toLocation: "To Location",
-    travelDate: "Travel Date",
+    fromLocation: "From Location:",
+    toLocation: "To Location:",
+    travelDate: "Travel Date:",
     searching: "Searching...",
     searchRoutes: "Search Routes",
     availableRoutes: "Available Routes",
     searchAgain: "Search Again",
     bookNow: "Book Now",
     liveBusTracking: "Live Bus Tracking",
-    liveBusHint: "Enter the bus number to see its live location.",
-    busNumberPlaceholder: "Enter Bus Number (e.g., 101)",
+    busNumber: "Bus Number:",
     trackBus: "Track Bus",
     dailyPass: "Daily Pass",
     weeklyPass: "Weekly Pass",
@@ -36,7 +34,8 @@ const translations = {
     confirmAndPay: "Confirm & Pay",
     ticketBooked: "Ticket Booked Successfully!",
     rightsReserved: "© 1999-2025 United Pingdom of MINET - All Rights Reserved",
-    changeToHindi: "हिंदी में",
+    changeToHindi: "हिंदी",
+    changeToEnglish: "English",
   },
   hi: {
     portalTitle: "यूपीएम सार्वजनिक परिवहन",
@@ -45,17 +44,16 @@ const translations = {
     findRoute: "मार्ग खोजें",
     liveTracking: "लाइव ट्रैकिंग",
     buyPass: "पास खरीदें",
-    fromLocation: "से स्थान",
-    toLocation: "तक स्थान",
-    travelDate: "यात्रा की तारीख",
+    fromLocation: "से स्थान:",
+    toLocation: "तक स्थान:",
+    travelDate: "यात्रा की तारीख:",
     searching: "खोज हो रही है...",
     searchRoutes: "मार्ग खोजें",
     availableRoutes: "उपलब्ध मार्ग",
     searchAgain: "फिर से खोजें",
     bookNow: "अभी बुक करें",
     liveBusTracking: "लाइव बस ट्रैकिंग",
-    liveBusHint: "बस का लाइव स्थान देखने के लिए बस नंबर दर्ज करें।",
-    busNumberPlaceholder: "बस नंबर दर्ज करें (उदा., 101)",
+    busNumber: "बस नंबर:",
     trackBus: "बस ट्रैक करें",
     dailyPass: "दैनिक पास",
     weeklyPass: "साप्ताहिक पास",
@@ -70,89 +68,28 @@ const translations = {
     ticketBooked: "टिकट सफलतापूर्वक बुक हो गया!",
     rightsReserved: "© 1999-2025 द यूनाइटेड पिंगडम ऑफ मिनेट - सर्वाधिकार सुरक्षित",
     changeToEnglish: "English",
+    changeToHindi: "हिंदी",
   },
 };
 
 // --- Helper Components ---
+const LoadingSpinner = () => <div className="spinner"></div>;
 
-const RouteCard = ({ route, onBookNow, lang }) => (
-  <div className="bg-white border border-stone-200 p-4 rounded-lg hover:shadow-lg transition-shadow duration-300">
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-      <div className="flex-1">
-        <div className="flex items-center space-x-3 mb-2">
-          <span className="text-red-600 font-bold">🚌 {route.name}</span>
-          <span className={`text-sm font-semibold px-2 py-0.5 rounded-full ${route.typeColor}`}>
-            {route.type}
-          </span>
-        </div>
-        <div className="text-sm text-stone-600">
-          <div className="flex items-center space-x-2 mb-1">
-            <span>📍 {route.from}</span>
-            <span className="text-red-500 font-bold">→</span>
-            <span>📍 {route.to}</span>
-          </div>
-          <div className="flex items-center space-x-4 text-xs text-stone-500">
-            <span>⏰ {route.duration}</span>
-            <span>💰 ₹{route.fare}</span>
-            <span>🕐 Freq: {route.frequency}</span>
-          </div>
-        </div>
-      </div>
-      <button 
-        onClick={() => onBookNow(route)}
-        className="bg-red-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-700 transition-colors duration-200 text-sm w-full sm:w-auto"
-      >
-        {lang.bookNow}
-      </button>
-    </div>
-  </div>
-);
+// --- Content View Components ---
 
-const BookingModal = ({ route, onClose, lang }) => (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-xl p-8 w-full max-w-lg shadow-2xl text-left">
-            <h2 className="text-2xl font-bold text-stone-800 mb-4">{lang.confirmTicket}</h2>
-            <div className="bg-stone-50 border border-stone-200 p-4 rounded-lg mb-6 space-y-2">
-                <p><span className="font-semibold">{lang.routeLabel}</span> {route.name}</p>
-                <p><span className="font-semibold">{lang.journeyLabel}</span> {route.from} to {route.to}</p>
-                <p><span className="font-semibold">{lang.fareLabel}</span> ₹{route.fare}</p>
-            </div>
-            <div className="flex gap-4">
-                <button
-                    onClick={onClose}
-                    className="flex-1 bg-stone-200 text-stone-800 font-semibold py-3 px-4 rounded-lg hover:bg-stone-300 transition-colors"
-                >
-                    {lang.cancel}
-                </button>
-                <button
-                    onClick={() => { alert(lang.ticketBooked); onClose(); }}
-                    className="flex-1 bg-green-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-green-700 transition-colors"
-                >
-                    {lang.confirmAndPay}
-                </button>
-            </div>
-        </div>
-    </div>
-);
-
-
-export default function TransportServicesPage() {
+const FindRouteView = ({ lang }) => {
   const [fromLocation, setFromLocation] = useState("City Center");
   const [toLocation, setToLocation] = useState("Airport");
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [showRoutes, setShowRoutes] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('find_route');
   const [bookingDetails, setBookingDetails] = useState(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
-  const [language, setLanguage] = useState('en');
-
-  const lang = translations[language];
 
   const availableRoutes = [
-    { name: "Route 101", type: "Express", typeColor: "bg-green-100 text-green-700", from: fromLocation, to: toLocation, duration: "2h 15m", fare: 45, frequency: "Every 30 min" },
-    { name: "Route 203", type: "Local", typeColor: "bg-blue-100 text-blue-700", from: fromLocation, to: toLocation, duration: "3h 30m", fare: 25, frequency: "Every 45 min" },
-    { name: "Route 156", type: "Premium", typeColor: "bg-purple-100 text-purple-700", from: fromLocation, to: toLocation, duration: "1h 45m", fare: 75, frequency: "Every 1 hour" },
+    { name: "Route 101", from: fromLocation, to: toLocation, fare: 45 },
+    { name: "Route 203", from: fromLocation, to: toLocation, fare: 25 },
+    { name: "Route 156", from: fromLocation, to: toLocation, fare: 75 },
   ];
 
   const handleSearchRoutes = (e) => {
@@ -169,123 +106,168 @@ export default function TransportServicesPage() {
     setShowBookingModal(true);
   };
 
+  return (
+    <>
+      {!showRoutes ? (
+        <form onSubmit={handleSearchRoutes}>
+          <div className="field-row-stacked">
+            <label htmlFor="from-location">{lang.fromLocation}</label>
+            <input id="from-location" type="text" value={fromLocation} onChange={(e) => setFromLocation(e.target.value)} required />
+          </div>
+          <div className="field-row-stacked">
+            <label htmlFor="to-location">{lang.toLocation}</label>
+            <input id="to-location" type="text" value={toLocation} onChange={(e) => setToLocation(e.target.value)} required />
+          </div>
+          <div className="field-row-stacked">
+            <label htmlFor="travel-date">{lang.travelDate}</label>
+            <input id="travel-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+          </div>
+          <section className="field-row" style={{ justifyContent: 'flex-end' }}>
+            <button type="submit" disabled={isLoading} className="min-w-[120px]">
+              {isLoading ? <LoadingSpinner /> : lang.searchRoutes}
+            </button>
+          </section>
+        </form>
+      ) : (
+        <div>
+          <p><b>{lang.availableRoutes}</b> for {fromLocation} to {toLocation}</p>
+          <div className="sunken-panel">
+            {availableRoutes.map((route, index) => (
+              <div key={index} className="flex items-center justify-between p-2 border-b border-gray-300">
+                <span>🚌 {route.name} - ₹{route.fare}</span>
+                <button onClick={() => handleBookNow(route)} className="btn-sm">{lang.bookNow}</button>
+              </div>
+            ))}
+          </div>
+          <section className="field-row mt-2" style={{ justifyContent: 'flex-end' }}>
+            <button onClick={() => setShowRoutes(false)}>{lang.searchAgain}</button>
+          </section>
+        </div>
+      )}
+      {showBookingModal && (
+        <div className="modal-overlay">
+          <div className="window modal-window">
+            <div className="title-bar"><div className="title-bar-text">{lang.confirmTicket}</div></div>
+            <div className="window-body">
+              <p><b>{lang.routeLabel}</b> {bookingDetails.name}</p>
+              <p><b>{lang.journeyLabel}</b> {bookingDetails.from} → {bookingDetails.to}</p>
+              <p><b>{lang.fareLabel}</b> ₹{bookingDetails.fare}</p>
+              <section className="field-row mt-3" style={{ justifyContent: 'flex-end' }}>
+                <button onClick={() => setShowBookingModal(false)}>{lang.cancel}</button>
+                <button onClick={() => { alert(lang.ticketBooked); setShowBookingModal(false); }} className="ml-2">{lang.confirmAndPay}</button>
+              </section>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+const LiveTrackingView = ({ lang }) => (
+  <form>
+    <div className="field-row-stacked">
+      <label htmlFor="bus-number">{lang.busNumber}</label>
+      <input id="bus-number" type="text" />
+    </div>
+    <section className="field-row" style={{ justifyContent: 'flex-end' }}>
+      <button type="submit">{lang.trackBus}</button>
+    </section>
+  </form>
+);
+
+const BuyPassView = ({ lang }) => (
+  <div>
+    <div className="sunken-panel p-2">
+      <div className="flex justify-between items-center p-2 border-b border-gray-300"><span>{lang.dailyPass}</span> <b>₹50</b></div>
+      <div className="flex justify-between items-center p-2 border-b border-gray-300"><span>{lang.weeklyPass}</span> <b>₹250</b></div>
+      <div className="flex justify-between items-center p-2"><span>{lang.monthlyPass}</span> <b>₹800</b></div>
+    </div>
+    <section className="field-row mt-2" style={{ justifyContent: 'flex-end' }}>
+      <button>{lang.proceedToBuy}</button>
+    </section>
+  </div>
+);
+
+// --- Main Page Component ---
+export default function TransportServicesPage() {
+  const [language, setLanguage] = useState('en');
+  const [activeTab, setActiveTab] = useState('find');
+
+  const lang = translations[language];
+
   const toggleLanguage = () => {
-    setLanguage(prev => prev === 'en' ? 'hi' : 'en');
+    setLanguage(prevLang => prevLang === 'en' ? 'hi' : 'en');
   };
 
-  const renderContent = () => {
+  const iconUrl = (name) => `https://placehold.co/16x16/d4d0c8/000000?text=${name.charAt(0)}`;
+
+  const renderActiveView = () => {
     switch (activeTab) {
-      case 'find_route':
-        return (
-          !showRoutes ? (
-            <form onSubmit={handleSearchRoutes} className="bg-stone-50 border border-stone-200 p-6 rounded-lg shadow-sm">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
-                <div>
-                  <label className="block text-stone-700 font-semibold mb-2">{lang.fromLocation}</label>
-                  <input type="text" value={fromLocation} onChange={(e) => setFromLocation(e.target.value)} className="w-full bg-white border-2 border-stone-300 p-4 rounded-lg text-black placeholder-stone-500" required />
-                </div>
-                <div>
-                  <label className="block text-stone-700 font-semibold mb-2">{lang.toLocation}</label>
-                  <input type="text" value={toLocation} onChange={(e) => setToLocation(e.target.value)} className="w-full bg-white border-2 border-stone-300 p-4 rounded-lg text-black placeholder-stone-500" required />
-                </div>
-              </div>
-              <div className="mb-5">
-                <label className="block text-stone-700 font-semibold mb-2">{lang.travelDate}</label>
-                <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full bg-white border-2 border-stone-300 p-4 rounded-lg text-black" required />
-              </div>
-              <button type="submit" disabled={isLoading} className="w-full bg-red-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-red-700 shadow-md disabled:opacity-50 flex items-center justify-center space-x-2">
-                {isLoading ? <span className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span> : <span>🔍</span>}
-                <span>{isLoading ? lang.searching : lang.searchRoutes}</span>
-              </button>
-            </form>
-          ) : (
-            <div className="bg-stone-50 border border-stone-200 p-6 rounded-lg shadow-sm animate-fade-in">
-              <h3 className="text-xl font-bold text-stone-800 mb-5 text-center">{lang.availableRoutes}</h3>
-              <div className="space-y-4 mb-6">
-                {availableRoutes.map((route, index) => (
-                  <RouteCard key={index} route={route} onBookNow={handleBookNow} lang={lang} />
-                ))}
-              </div>
-              <button onClick={() => setShowRoutes(false)} className="w-full bg-stone-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-stone-700">
-                🔍 {lang.searchAgain}
-              </button>
-            </div>
-          )
-        );
-      case 'live_tracking':
-        return (
-          <div className="bg-stone-50 border border-stone-200 p-6 rounded-lg shadow-sm animate-fade-in">
-            <h3 className="text-xl font-bold text-stone-800 mb-4">{lang.liveBusTracking}</h3>
-            <p className="text-stone-600 mb-4 text-sm">{lang.liveBusHint}</p>
-            <input type="text" className="w-full bg-white border-2 border-stone-300 p-4 rounded-lg text-black placeholder-stone-500 mb-4" placeholder={lang.busNumberPlaceholder} />
-            <button className="w-full bg-red-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-red-700">{lang.trackBus}</button>
-          </div>
-        );
-      case 'buy_pass':
-        return (
-          <div className="bg-stone-50 border border-stone-200 p-6 rounded-lg shadow-sm animate-fade-in">
-            <h3 className="text-xl font-bold text-stone-800 mb-4">{lang.buyPass}</h3>
-            <div className="space-y-3">
-                <div className="flex justify-between items-center bg-white p-3 rounded-lg border"><span>{lang.dailyPass}</span> <span className="font-bold">₹50</span></div>
-                <div className="flex justify-between items-center bg-white p-3 rounded-lg border"><span>{lang.weeklyPass}</span> <span className="font-bold">₹250</span></div>
-                <div className="flex justify-between items-center bg-white p-3 rounded-lg border"><span>{lang.monthlyPass}</span> <span className="font-bold">₹800</span></div>
-            </div>
-            <button className="w-full mt-4 bg-green-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-green-700">{lang.proceedToBuy}</button>
-          </div>
-        );
-      default:
-        return null;
+      case 'find': return <FindRouteView lang={lang} />;
+      case 'live': return <LiveTrackingView lang={lang} />;
+      case 'pass': return <BuyPassView lang={lang} />;
+      default: return <FindRouteView lang={lang} />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-stone-50 font-['Inter', 'Segoe UI', sans-serif] text-stone-800">
-      {showBookingModal && <BookingModal route={bookingDetails} onClose={() => setShowBookingModal(false)} lang={lang} />}
+    <div className="desktop-background">
+      <div className="crt-monitor">
+        <div className="monitor-bezel">
+          <div className="monitor-screen">
+            <div className="container-wrapper">
+              <header className="title-bar">
+                <div className="title-bar-text">
+                  <img src={iconUrl("T")} alt="UPM Transport Logo" className="title-bar-icon" />
+                  {lang.portalTitle} - {lang.portalSubtitle}
+                </div>
+                <div className="title-bar-controls">
+                  <button aria-label="Minimize" disabled></button>
+                  <button aria-label="Maximize" disabled></button>
+                  <button aria-label="Close" disabled></button>
+                </div>
+              </header>
 
-      <header className="bg-white shadow-sm border-b border-stone-200 sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-red-600 rounded-lg flex items-center justify-center shadow-md">
-                <span className="text-white text-xl font-bold">🚌</span>
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-stone-800">{lang.portalTitle}</h1>
-                <p className="text-stone-600 text-sm">{lang.portalSubtitle}</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-               <button onClick={toggleLanguage} className="px-4 py-2 text-sm font-semibold text-red-600 hover:text-red-800">
-                {language === 'en' ? lang.changeToHindi : lang.changeToEnglish}
-              </button>
-              <Link href="/">
-                <button className="px-6 py-2 bg-amber-600 text-white font-medium rounded-lg hover:bg-amber-700 shadow-sm">
-                  {lang.backToHome}
+              <div className="toolbar">
+                <a href="/" className="btn btn-sm">
+                  <img src={iconUrl("H")} alt="" /> {lang.backToHome}
+                </a>
+                <button onClick={toggleLanguage} className="lang-toggle">
+                  <img src={iconUrl("G")} alt="" />
+                  {language === 'en' ? lang.changeToHindi : lang.changeToEnglish}
                 </button>
-              </Link>
+              </div>
+
+              <main className="window-body">
+                <div className="sunken-panel p-1">
+                  <div role="tablist" className="flex border-b-2 border-gray-500">
+                    <button role="tab" aria-selected={activeTab === 'find'} onClick={() => setActiveTab('find')} className="btn-tab">{lang.findRoute}</button>
+                    <button role="tab" aria-selected={activeTab === 'live'} onClick={() => setActiveTab('live')} className="btn-tab">{lang.liveTracking}</button>
+                    <button role="tab" aria-selected={activeTab === 'pass'} onClick={() => setActiveTab('pass')} className="btn-tab">{lang.buyPass}</button>
+                  </div>
+                  <div className="p-2">
+                    {renderActiveView()}
+                  </div>
+                </div>
+              </main>
+
+              <footer className="status-bar">
+                <p className="status-bar-field">UPM Public Transport</p>
+                <p className="status-bar-field">{lang.rightsReserved}</p>
+                <p className="status-bar-field">
+                  <img src={iconUrl("O")} alt="" /> Online
+                </p>
+              </footer>
             </div>
           </div>
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-6 py-8">
-        <div className="bg-white rounded-xl shadow-md border border-stone-200 p-8">
-          <div className="border-b border-stone-200 mb-6">
-            <nav className="flex space-x-4">
-              <button onClick={() => setActiveTab('find_route')} className={`py-2 px-4 font-semibold ${activeTab === 'find_route' ? 'border-b-2 border-red-600 text-red-600' : 'text-stone-500'}`}>{lang.findRoute}</button>
-              <button onClick={() => setActiveTab('live_tracking')} className={`py-2 px-4 font-semibold ${activeTab === 'live_tracking' ? 'border-b-2 border-red-600 text-red-600' : 'text-stone-500'}`}>{lang.liveTracking}</button>
-              <button onClick={() => setActiveTab('buy_pass')} className={`py-2 px-4 font-semibold ${activeTab === 'buy_pass' ? 'border-b-2 border-red-600 text-red-600' : 'text-stone-500'}`}>{lang.buyPass}</button>
-            </nav>
+          <div className="monitor-details">
+            <span className="monitor-brand">SONY</span>
+            <div className="power-button"></div>
+            <div className="power-led"></div>
           </div>
-          {renderContent()}
         </div>
-      </main>
-
-      <footer className="bg-stone-800 text-white py-12 mt-8">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <p className="text-stone-400 text-sm">{lang.rightsReserved}</p>
-        </div>
-      </footer>
+      </div>
     </div>
   );
 }

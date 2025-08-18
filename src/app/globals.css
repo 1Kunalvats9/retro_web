@@ -1,227 +1,431 @@
-@import "tailwindcss";
 
+/* UPM Government Portal - "Computer on a Desk" Redesign
+  This stylesheet wraps the Windows 98 UI inside a CRT monitor component.
+*/
+
+/* --- I. Design System: CSS Variables --- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --primary: #d97706;
-  --primary-dark: #b45309;
-  --success: #059669;
-  --error: #dc2626;
-  --warning: #d97706;
-  --info: #2563eb;
+  /* Core Color Palette (Windows 98 Inspired) */
+  --desktop-bg: #008080; /* Teal Desktop */
+  --monitor-bezel-color: #e6e6e6; /* Beige plastic */
+  --content-bg: #d4d0c8; /* Standard UI Gray */
+  --foreground: #000000;
+  --header-bg-active: #000080; /* Navy Blue */
+  --header-bg-inactive: #808080; /* Medium Gray */
+  --header-text: #FFFFFF;
+  
+  /* Border Colors for 3D Effects */
+  --border-color-light: #FFFFFF; /* White highlight */
+  --border-color-dark: #808080; /* Gray shadow */
+  --border-color-darker: #000000; /* Black sunken edge */
+
+  /* Link & Notice Colors */
+  --link-color: #0000EE;
+  --link-visited-color: #551A8B;
+  --notice-bg: #FFFFCC;
+  --notice-border: #FFD700;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* --- II. Global Styles & OS Shell --- */
 body {
-  background: var(--background);
+  margin: 0;
+  padding: 0;
   color: var(--foreground);
-  font-family: 'Inter', 'Segoe UI', sans-serif, Arial, Helvetica, sans-serif;
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+  font-size: 14px;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: grayscale;
+  font-smooth: never;
 }
 
-/* Loading spinner */
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+/* The background for the entire page, resembling a desktop wallpaper */
+.desktop-background {
+  background-color: var(--desktop-bg);
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAAXNSR0IArs4c6QAAABNJREFUCFtjZGD4z4AG/gE/IwbkGSA+iQAAAABJRU5ErkJggg==");
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden; /* Prevent body scroll */
 }
 
-.spinner {
-  animation: spin 1s linear infinite;
+/* --- NEW: CRT Monitor Styles --- */
+.crt-monitor {
+  width: 100%;
+  max-width: 1200px;
+  height: 95vh;
+  max-height: 800px;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Pulse animation for loading states */
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
+.monitor-bezel {
+  background: var(--monitor-bezel-color);
+  border: 1px solid #333;
+  box-shadow: 
+    inset 3px 3px 10px rgba(255, 255, 255, 0.7),
+    inset -3px -3px 10px rgba(0, 0, 0, 0.3),
+    5px 5px 15px rgba(0,0,0,0.5);
+  border-radius: 20px 20px 50px 50px / 20px 20px 5px 5px;
+  padding: 25px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
 }
-
-.pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+.monitor-brand{
+  font-weight: bold;
+  font-size: 24px;
+  width: 100%;
+  text-align: center;
 }
-
-/* Success animation */
-@keyframes checkmark {
-  0% {
-    transform: scale(0);
-  }
-  50% {
-    transform: scale(1.2);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-.checkmark {
-  animation: checkmark 0.6s ease-in-out;
-}
-
-/* Error shake animation */
-@keyframes shake {
-  0%, 100% {
-    transform: translateX(0);
-  }
-  25% {
-    transform: translateX(-5px);
-  }
-  75% {
-    transform: translateX(5px);
-  }
-}
-
-.shake {
-  animation: shake 0.5s ease-in-out;
-}
-
-/* Slide in animation */
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.slide-in {
-  animation: slideIn 0.3s ease-out;
-}
-
-/* Fade in animation */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.fade-in {
-  animation: fadeIn 0.5s ease-out;
-}
-
-/* Button hover effects */
-.btn-primary {
-  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
-  transition: all 0.3s ease;
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(217, 119, 6, 0.3);
-  background: linear-gradient(135deg, #b45309 0%, #92400e 100%);
-}
-
-.btn-secondary {
-  transition: all 0.3s ease;
-}
-
-.btn-secondary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-/* Card hover effects */
-.service-card {
-  transition: all 0.3s ease;
+.monitor-screen {
+  background: #000;
+  border: 3px solid #333;
+  border-radius: 15px;
+  flex-grow: 1;
   position: relative;
-  overflow: hidden;
+  overflow: auto; /* IMPORTANT: This makes the content inside scrollable */
+  display: flex; /* Center the application window */
+  align-items: center; /* Align window to the top */
+  justify-content: center;
 }
 
-.service-card::before {
-  content: '';
+/* Screen Effects: Scanlines and Glow */
+.monitor-screen::before {
+  content: " ";
+  display: block;
   position: absolute;
   top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-  transition: left 0.5s;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: 
+    linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+    linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+  z-index: 2;
+  background-size: 100% 2px, 3px 100%;
+  pointer-events: none;
 }
-
-.service-card:hover::before {
-  left: 100%;
-}
-
-.service-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-}
-
-/* Input focus effects */
-.input-field {
-  transition: all 0.3s ease;
-}
-
-.input-field:focus {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(217, 119, 6, 0.15);
-}
-
-/* Status indicators */
-.status-success {
-  background: linear-gradient(135deg, #059669 0%, #047857 100%);
-}
-
-.status-error {
-  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-}
-
-.status-warning {
-  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
-}
-
-.status-info {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-}
-
-/* Accessibility improvements */
-.high-contrast {
-  filter: contrast(1.2);
-}
-
-.large-text {
-  font-size: 1.125rem;
-  line-height: 1.75rem;
-}
-
-/* Visual indicators for illiterate users */
-.visual-indicator {
-  position: relative;
-}
-
-.visual-indicator::after {
-  content: '';
+.monitor-screen::after {
+  content: " ";
+  display: block;
   position: absolute;
-  bottom: -2px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 2px;
-  background: var(--primary);
-  transition: width 0.3s ease;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.1) 0%,rgba(255,255,255,0) 100%);
+  opacity: 0.2;
+  z-index: 3;
+  pointer-events: none;
 }
 
-.visual-indicator:hover::after {
-  width: 100%;
+.monitor-details {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding-top: 10px;
+  height: 30px; /* Space for the button */
 }
+.power-button {
+  width: 30px;
+  height: 30px;
+  background: #b0b0b0;
+  border: 2px solid;
+  border-color: #fff #555 #555 #fff;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+.power-led {
+  width: 8px;
+  height: 8px;
+  background: #32cd32; /* Lime Green */
+  border-radius: 50%;
+  border: 1px solid #228b22;
+  box-shadow: 0 0 5px #32cd32;
+}
+
+/* The main "application window" */
+.container-wrapper {
+  max-width: 960px;
+  width: 100%;
+  /* Remove margin so it fits inside the screen */
+  margin: 0; 
+  background: var(--content-bg);
+  border: 2px solid;
+  border-color: var(--border-color-light) var(--border-color-darker) var(--border-color-darker) var(--border-color-light);
+  box-shadow: 1px 1px 0 var(--border-color-darker);
+}
+
+/* Responsive adjustments for mobile */
+@media (max-width: 768px) {
+  .desktop-background {
+    align-items: flex-start;
+    padding: 0;
+  }
+  .crt-monitor, .monitor-bezel, .monitor-details {
+    display: none; /* Hide the monitor on small screens */
+  }
+  .monitor-screen {
+    /* The screen becomes the main container */
+    width: 100vw;
+    height: 100vh;
+    border: none;
+    border-radius: 0;
+  }
+  .container-wrapper {
+    max-width: 100%;
+    height: 100%;
+    border: none;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+  }
+  .window-body {
+    flex-grow: 1;
+    overflow-y: auto;
+  }
+}
+/* --- End NEW CRT Monitor Styles --- */
+
+
+/* --- III. Core UI Components (Windows 98 Style) --- */
+
+/* Title Bar (replaces original header) */
+.title-bar {
+  background: var(--header-bg-active);
+  color: var(--header-text);
+  font-weight: bold;
+  padding: 3px 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+  flex-shrink: 0;
+}
+.title-bar-text { display: flex; align-items: center; }
+.title-bar-icon { margin-right: 4px; }
+.title-bar-controls { display: flex; }
+.title-bar-controls button {
+  width: 16px;
+  height: 14px;
+  min-width: 0;
+  padding: 0;
+  margin-left: 2px;
+  background-color: var(--content-bg);
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* Toolbar (for user session & language) */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px;
+  border-bottom: 1px solid var(--border-color-dark);
+  box-shadow: 0 1px 0 var(--border-color-light);
+  flex-shrink: 0;
+}
+.user-session { display: flex; align-items: center; gap: 6px; }
+.user-session span { font-size: 13px; }
+.btn-sm { font-size: 12px; padding: 2px 8px; display: flex; align-items: center; gap: 4px; }
+.lang-toggle { background: none; border: none; font-family: inherit; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+.lang-toggle:hover { text-decoration: underline; }
+
+/* Main Window Body */
+.window-body {
+  padding: 12px;
+}
+
+/* Status Bar (replaces original footer) */
+.status-bar {
+  display: flex;
+  padding: 2px 4px;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.status-bar-field {
+  padding: 2px 4px;
+  border: 1px solid var(--border-color-dark);
+  box-shadow: inset 1px 1px 0 var(--border-color-light);
+  margin-right: 4px;
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.status-bar-field:last-child { flex-grow: 0; }
+
+/* --- IV. Interactive Elements --- */
+
+/* Standard Button */
+button,.btn {
+  font-family: Verdana, Arial, sans-serif;
+  font-size: 14px;
+  padding: 4px 12px;
+  min-width: 75px;
+  min-height: 23px;
+  background: var(--content-bg);
+  border: 2px solid;
+  border-color: var(--border-color-light) var(--border-color-darker) var(--border-color-darker) var(--border-color-light);
+  box-shadow: 1px 1px 0 var(--border-color-darker);
+  cursor: pointer;
+}
+button:active,.btn:active {
+  border-color: var(--border-color-darker) var(--border-color-light) var(--border-color-light) var(--border-color-darker);
+  box-shadow: none;
+  transform: translate(1px, 1px);
+}
+button:disabled {
+  color: var(--border-color-dark);
+  text-shadow: 1px 1px 0 var(--border-color-light);
+  cursor: default;
+}
+button:disabled:active {
+  border-color: var(--border-color-light) var(--border-color-darker) var(--border-color-darker) var(--border-color-light);
+  transform: none;
+}
+
+/* Form Inputs */
+input[type="text"], input[type="password"] {
+  padding: 4px;
+  border: 2px inset;
+  border-color: var(--border-color-dark) var(--border-color-light) var(--border-color-light) var(--border-color-dark);
+  background: #FFFFFF;
+  font-family: inherit;
+  font-size: 14px;
+  width: 100%;
+  box-sizing: border-box;
+}
+input:focus { outline: none; }
+.field-row-stacked { margin-bottom: 12px; }
+.field-row-stacked label { display: block; margin-bottom: 4px; }
+.field-row { display: flex; align-items: center; }
+
+/* Links */
+a { color: var(--link-color); text-decoration: underline; }
+a:visited { color: var(--link-visited-color); }
+a:hover { text-decoration: none; }
+
+/* --- V. Content Modules --- */
+
+/* Hero Section (as a Fieldset/Group Box) */
+.hero-section {
+  border: 2px groove;
+  padding: 12px;
+  margin: 0 0 12px 0;
+}
+.hero-section legend { font-weight: bold; padding: 0 4px; }
+.hero-section p { margin: 0; }
+
+/* News Marquee */
+.news-marquee {
+  background: var(--notice-bg);
+  border: 1px solid var(--notice-border);
+  padding: 8px;
+  color: #333333;
+  margin-bottom: 12px;
+}
+
+/* Main Content Layout */
+.main-content-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 768px) {
+ .main-content-grid { grid-template-columns: 1fr; }
+}
+
+/* Panel (used for Services and Quick Links) */
+.panel {
+  border: 2px groove;
+}
+.panel-header {
+  background: var(--header-bg-inactive);
+  color: var(--header-text);
+  font-weight: bold;
+  padding: 3px 5px;
+}
+.panel-body { padding: 8px; }
+.panel-body p { font-size: 13px; margin-top: 0; }
+.panel-body ul { list-style: none; margin: 0; padding: 0; }
+
+/* Sunken Panel (for service list) */
+.sunken-panel {
+  background: #FFFFFF;
+  border: 2px inset;
+  border-color: var(--border-color-dark) var(--border-color-light) var(--border-color-light) var(--border-color-dark);
+  padding: 8px;
+  height: 250px; /* Example fixed height */
+  overflow-y: auto;
+}
+
+/* Service Item (reimagined as a list item) */
+.service-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  border-bottom: 1px solid var(--content-bg);
+}
+.service-item:last-child { border-bottom: none; }
+.service-icon { flex-shrink: 0; }
+.service-content { flex-grow: 1; }
+.service-content h4 { font-size: 14px; margin: 0 0 2px 0; }
+.service-content p { font-size: 12px; color: #555; margin: 0; }
+.service-link { font-size: 13px; font-weight: bold; }
+
+/* --- VI. Modals & Notifications --- */
+
+/* Modal (Windows 98 Dialog Style) */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.window.modal-window {
+  box-shadow: 1px 1px 5px rgba(0,0,0,0.3);
+}
+.modal-window.window-body {
+  padding: 12px;
+}
+.modal-window form {
+  margin-top: 12px;
+}
+
+/* Status Messages */
+.status-message {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  padding: 10px 15px;
+  border: 1px solid;
+  box-shadow: 2px 2px 3px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 200;
+}
+.status-success { background: #c3e6cb; color: #155724; border-color: #b1dfbb; }
+.status-error { background: #f5c6cb; color: #721c24; border-color: #edbabe; }
+.status-info { background: #bee5eb; color: #0c5460; border-color: #b1dfbb; }
+.status-close-btn { font-size: 20px; font-weight: bold; background: none; border: none; cursor: pointer; padding: 0; line-height: 1; }
+
+/* Loading Spinner */
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--foreground);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
